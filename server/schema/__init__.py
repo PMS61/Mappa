@@ -1,1 +1,0 @@
-from .userSchema import Peoples
