@@ -24,6 +24,11 @@ a {
   box-sizing: border-box;
 }
 
+body {
+  /* Ensure consistent class names */
+  class: "antialiased";
+}
+
 .divmain {
   position: relative;
   width: 100%;
