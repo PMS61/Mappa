@@ -3,7 +3,7 @@ from supabase import create_client, Client
 import os
 import uuid
 import logging
-from models import RoomRequestModel, RoomResponseModel, RoomAndPathRequestModel, RoomAndPathResponseModel
+from models import RoomRequestModel, RoomResponseModel, RoomAndPathRequestModel, RoomAndPathResponseModel, NewFileRequestModel, NewFileResponseModel
 
 router = APIRouter()
 
@@ -44,3 +44,17 @@ async def get_room_and_path(req: RoomAndPathRequestModel):
     
     rooms = [{"room_id": room["room_id"], "path": room["path"]} for room in response.data]
     return {"error": False, "message": "Rooms and paths retrieved successfully", "rooms": rooms}
+
+@router.post("/create-new-file", response_model=NewFileResponseModel)
+async def create_new_file(req: NewFileRequestModel):
+    room_id = str(uuid.uuid4())
+    response = supabase.table("room").insert({
+        "room_id": room_id,
+        "repo_id": req.repo_id,
+        "path": req.path,
+    }).execute()
+    if not response.data:
+        logger.error(f"Failed to create new file: {response.error.message}")
+        raise HTTPException(status_code=500, detail=f"Failed to create new file: {response.error.message}")
+    
+    return {"error": False, "message": "New file created successfully", "room_id": room_id}

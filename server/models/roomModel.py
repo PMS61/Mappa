@@ -19,3 +19,12 @@ class RoomAndPathResponseModel(BaseModel):
     error: bool
     message: str
     rooms: list[dict[str, str]]
+
+class NewFileRequestModel(BaseModel):
+    repo_id: str
+    path: str
+
+class NewFileResponseModel(BaseModel):
+    error: bool
+    message: str
+    room_id: str
