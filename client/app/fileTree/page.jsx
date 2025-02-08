@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { FaFolder, FaFolderOpen, FaFile } from "react-icons/fa";
+import CreateFileModal from "./CreateFileModal";
+import { createFolder } from "./folderUtils";
 
 const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContextMenu }) => {
+    if (name == ".hidden") return null;
     return (
         <div 
             className="py-1 px-5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
@@ -25,7 +28,7 @@ const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContex
     );
 };
 
-const TreeView = ({ paths }) => {
+const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick }) => {
     const [collapsed, setCollapsed] = useState({});
     const [contextMenu, setContextMenu] = useState(null);
 
@@ -69,7 +72,9 @@ const TreeView = ({ paths }) => {
         setContextMenu(null);
     };
 
-    const sortedPaths = paths.sort();
+    const sortedPaths = paths
+        // .filter((path) => !path.endsWith(".hidden"))    // <--- add this line
+        .sort();
     const blocks = {};
 
     sortedPaths.forEach(path => {
@@ -107,44 +112,105 @@ const TreeView = ({ paths }) => {
         });
     };
 
+    const renderContextMenu = () => (
+        contextMenu && (
+            <div
+                className="fixed context-menu"
+                style={{ top: contextMenu.mouseY, left: contextMenu.mouseX }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="bg-white dark:bg-gray-700 shadow-lg rounded-md p-4">
+                    <div className="mb-4 text-gray-800 dark:text-gray-200">
+                        Path: {contextMenu.path}
+                    </div>
+                    {!contextMenu.isFile && (
+                        <>
+                            <button 
+                                className="block text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-md mb-2"
+                                onClick={() => {
+                                    handleCreateFileClick(contextMenu.path);
+                                    handleClose();
+                                }}
+                            >
+                                Create File
+                            </button>
+                            <button 
+                                className="block text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-md mb-2"
+                                onClick={() => {
+                                    handleCreateFolderClick(contextMenu.path);
+                                    handleClose();
+                                }}
+                            >
+                                Create Folder
+                            </button>
+                        </>
+                    )}
+                    <button className="block text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-md">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        )
+    );
+
     return (
         <div className="h-full bg-white dark:bg-gray-800 flex flex-col">
             <h2 className="text-xl font-bold py-2 text-center text-gray-700 dark:text-gray-200 border-b">Directory Tree</h2>
             <div className="overflow-y-auto flex-1 p-1">
                 {renderBlocks(blocks)}
             </div>
-            {contextMenu && (
-                <div
-                    className="fixed context-menu"
-                    style={{ top: contextMenu.mouseY, left: contextMenu.mouseX }}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="bg-white dark:bg-gray-700 shadow-lg rounded-md p-4">
-                        <div className="mb-4 text-gray-800 dark:text-gray-200">
-                            Path: {contextMenu.path}
-                        </div>
-                        {!contextMenu.isFile && (
-                            <>
-                                <button className="block text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-md mb-2">
-                                    Create File
-                                </button>
-                                <button className="block text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-md mb-2">
-                                    Create Folder
-                                </button>
-                            </>
-                        )}
-                        <button className="block text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-md">
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            )}
+            {renderContextMenu()}
         </div>
     );
 };
 
-export default function FileTree({ paths, socket }) {
+export default function FileTree({ paths, socket, room }) {
+    const [localPaths, setLocalPaths] = useState(paths);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentPath, setCurrentPath] = useState('');
+
+    useEffect(() => {
+        socket.on('file-tree', (newPaths) => {
+            setLocalPaths(newPaths);
+        });
+
+        return () => {
+            socket.off('file-tree');
+        };
+    }, []);
+
+    const createFile = (parentPath, fileName) => {
+        const newPath = parentPath ? `${parentPath}/${fileName}` : fileName;
+        const updatedPaths = [...localPaths, newPath];
+        setLocalPaths(updatedPaths);
+        socket.emit('send-file-tree', {
+            room: room,
+            message: updatedPaths
+        });
+    };
+
+    const handleCreateFileClick = (path) => {
+        setCurrentPath(path);
+        setIsModalOpen(true);
+    };
+
+    const handleCreateFolderClick = (path) => {
+        const folderName = prompt("Enter folder name");
+        createFolder(path, folderName, localPaths, setLocalPaths, socket, room);
+    };
+
     return (
-        <TreeView paths={paths} />
+        <>
+            <TreeView 
+                paths={localPaths} 
+                handleCreateFileClick={handleCreateFileClick} 
+                handleCreateFolderClick={handleCreateFolderClick} 
+            />
+            <CreateFileModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={(fileName) => createFile(currentPath, fileName)}
+            />
+        </>
     );
 }

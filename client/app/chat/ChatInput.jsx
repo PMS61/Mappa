@@ -2,23 +2,28 @@
 
 import React, { useState } from 'react'
 
-const ChatInput = ({ addMessage }) => {
+const ChatInput = ({ socket, addMessage }) => {
   const [message, setMessage] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (message.trim()) {
-      addMessage({ sender: 'User1', message, type: 'primary' })
+      socket.emit("send-chat-message", { sender: 'User1', message, type: 'secondary' });
       setMessage('')
     }
   }
+
+  const handleChange = (e) => {
+    setMessage(e.target.value);
+    socket.emit("typing", "User1");
+  };
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 flex">
       <input
         type="text"
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={handleChange}
         className="flex-grow p-2 rounded-l-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-200"
         placeholder="Type your message..."
       />

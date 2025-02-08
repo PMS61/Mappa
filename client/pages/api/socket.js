@@ -19,9 +19,24 @@ export default function handler(req, res) {
                 io.to(room).emit("message", `User ${socket.id} joined ${room}`);
             });
 
-            // Send message to a specific room
-            socket.on("sendMessage", ({ room, message }) => {
-                io.to(room).emit("message", message);
+            // Send file tree to a specific room
+            socket.on("send-file-tree", ({ room, message }) => {
+                io.to(room).emit("file-tree", message);
+            });
+
+            // Send chat message to a specific room
+            socket.on("send-chat-message", (payload) => {
+                const room = Object.keys(socket.rooms).find(r => r !== socket.id);
+                if (room) {
+                    io.to(room).emit("chat-message", payload);
+                }
+            });
+
+            socket.on("typing", (username) => {
+                const room = Object.keys(socket.rooms).find(r => r !== socket.id);
+                if (room) {
+                    io.to(room).emit("typing", username);
+                }
             });
 
             // Leave a room
