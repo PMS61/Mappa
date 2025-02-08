@@ -1,10 +1,12 @@
-
-export function createFolder(parentPath, folderName, localPaths, setLocalPaths, socket, room) {
+export function createFolder(parentPath, folderName, localPaths, setLocalPaths) {
   if (!folderName) return;
   const newPath = parentPath 
     ? `${parentPath}/${folderName}/.hidden` 
     : `${folderName}/.hidden`;
-  const updatedPaths = [...localPaths, newPath];
+  const newPathObj = {
+    room_id: Date.now().toString(),
+    path: newPath
+  };
+  const updatedPaths = [...localPaths, newPathObj];
   setLocalPaths(updatedPaths);
-  socket.emit('send-file-tree', { room, message: updatedPaths });
 }
