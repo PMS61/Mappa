@@ -6,7 +6,7 @@ import { FaFolder, FaFolderOpen, FaFile } from "react-icons/fa";
 const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContextMenu }) => {
     return (
         <div 
-            className="mb-1 py-1 px-2 rounded"
+            className="py-1 px-5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
             onContextMenu={onContextMenu}
             style={{ marginLeft: depth * 12 }}
         >
@@ -15,11 +15,11 @@ const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContex
                 onClick={onToggle}
             >
                 {isFile ? (
-                    <FaFile className="mr-2" />
+                    <FaFile className="mr-3" />
                 ) : (
-                    isCollapsed ? <FaFolder className="mr-2" /> : <FaFolderOpen className="mr-2" />
+                    isCollapsed ? <FaFolder className="mr-3" /> : <FaFolderOpen className="mr-3" />
                 )}
-                <span className="font-semibold">{name}</span>
+                <span className="font-semibold select-none">{name}</span>
             </div>
         </div>
     );
@@ -108,9 +108,9 @@ const TreeView = ({ paths }) => {
     };
 
     return (
-        <div className="fixed top-0 left-0 h-full w-64 bg-white shadow-lg dark:bg-gray-800 flex flex-col">
-            <h2 className="text-xl font-bold p-2 text-center text-gray-700 dark:text-gray-200">Directory Tree</h2>
-            <div className="overflow-y-auto flex-1 p-2">
+        <div className="h-full bg-white dark:bg-gray-800 flex flex-col">
+            <h2 className="text-xl font-bold py-2 text-center text-gray-700 dark:text-gray-200 border-b">Directory Tree</h2>
+            <div className="overflow-y-auto flex-1 p-1">
                 {renderBlocks(blocks)}
             </div>
             {contextMenu && (
@@ -145,8 +145,6 @@ const TreeView = ({ paths }) => {
 
 export default function FileTree({ paths, socket }) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-            <TreeView paths={paths} />
-        </div>
+        <TreeView paths={paths} />
     );
 }

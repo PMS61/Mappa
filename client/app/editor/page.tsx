@@ -1,12 +1,12 @@
 import { Room } from "./Room";
 import { CollaborativeEditor } from "../components/CollaborativeEditor";
 
-export default function Home() {
+export default function Editor() {
   return (
-    <main>
+    <div className="divmain">
       <Room>
         <CollaborativeEditor />
       </Room>
-    </main>
+    </div>
   );
 }

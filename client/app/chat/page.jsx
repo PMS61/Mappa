@@ -20,15 +20,17 @@ const Chat = ({socket}) => {
   }
 
   return (
-      <div className="absolute top-0 right-0 w-2/6 h-screen bg-gradient-to-r from-yellow-100 to-orange-100 backdrop-blur-md shadow-2xl p-8 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 flex flex-col">
-        <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent dark:from-blue-500 dark:to-purple-500">
-          Chat UI ✨
-        </h2>
-        <div className="flex-grow overflow-y-auto p-4 bg-yellow-50 dark:bg-gray-700 rounded-lg flex flex-col space-y-4">
-          <ChatMessages conversation={conversation} />
-        </div>
+    <div className="h-full bg-gradient-to-r from-yellow-100 to-orange-100 backdrop-blur-md dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 flex flex-col">
+      <h2 className="text-xl font-bold text-center p-4 bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent dark:from-blue-500 dark:to-purple-500">
+        Chat
+      </h2>
+      <div className="flex-grow overflow-y-auto px-2 bg-yellow-50 dark:bg-gray-700 flex flex-col space-y-4">
+        <ChatMessages conversation={conversation} />
+      </div>
+      <div className="p-2">
         <ChatInput addMessage={addMessage} />
       </div>
+    </div>
   )
 }
 
