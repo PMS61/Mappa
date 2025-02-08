@@ -14,18 +14,19 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 @router.post("/login", response_model=userResMod)
 async def login(req: userReqMod):
     response = supabase.table("login").select("uid, password").eq("email", req.email).single().execute()
-    if response.data:
-        user = response.data
-        if verify_hash_pass(req.password, user["password"]):
-            token = jwt_encode(user["uid"])
-            return {"error": False, "token": token}
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+    if not response.data:
+        return {"error": True, "token": ""}
+    user = response.data
+    if not verify_hash_pass(req.password, user["password"]):
+        return {"error": True, "token": ""}
+    token = jwt_encode(user["uid"])
+    return {"error": False, "token": token}
 
 @router.post("/register", response_model=userResMod)
 async def register(req: userReqMod):
     response = supabase.table("login").select("uid").eq("email", req.email).execute()
     if response.data:
-        raise HTTPException(status_code=400, detail="User already exists")
+        return {"error": True, "token": ""}
     hash_pass = hashed_pass(req.password)
     response = supabase.table("login").insert({
         "uid": str(uuid.uuid4()),

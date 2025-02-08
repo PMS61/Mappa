@@ -17,7 +17,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(auth_router, prefix="/auth")  
+app.include_router(auth_router, prefix="/auth")
 app.include_router(repo_router, prefix="/repo")
 
 if __name__ == "__main__":
