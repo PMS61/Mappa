@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 
 const ChatMessages = ({ conversation }) => {
   const formatMessage = (message) => {
@@ -20,6 +20,11 @@ const ChatMessages = ({ conversation }) => {
     formattedMessage += line.trim()
     return formattedMessage
   }
+
+  useEffect(() => {
+    if (!conversation.length) return;
+    console.log("Received new message:", conversation[conversation.length - 1]);
+  }, [conversation]);
 
   return (
     <div className="max-h-full overflow-y-auto p-4 bg-yellow-50 dark:bg-gray-700 rounded-lg flex flex-col space-y-4">

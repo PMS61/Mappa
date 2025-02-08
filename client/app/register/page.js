@@ -2,15 +2,17 @@
 
 import React, { useState } from 'react'
 import registerAction from "@/actions/register"
-
+import { useRouter } from "next/navigation"
 const Page = () => {
+  const router = useRouter()
   let [formData, setFormData] = useState({})
   let [error, setError] = useState(false)
   const handleRegister = async (e) => {
     e.preventDefault()
     try {
-      let error = await registerAction(formData)
-      setError(error)
+      let response = await registerAction(formData)
+      if (response.success) router.push("/dashboard")
+      else setError(response.success)
     }
     catch (e) {
       console.log(e)
@@ -51,6 +53,20 @@ const Page = () => {
                     type="email"
                     placeholder="email"
                     onChange={(e) => { setFormData({ ...formData, email: e.target.value }) }}
+                    className="input input-bordered hover:border-yellow-400 focus:border-yellow-500 text-gray-800 dark:text-gray-200 dark:bg-gray-700"
+                    required
+                  />
+                </div>
+                <div className="form-control" style={{ "--index": 1 }}>
+                  <label className="label">
+                    <span className="label-text flex items-center gap-2 dark:text-gray-200">
+                      🚽 User Name
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="User Name"
+                    onChange={(e) => { setFormData({ ...formData, username: e.target.value }) }}
                     className="input input-bordered hover:border-yellow-400 focus:border-yellow-500 text-gray-800 dark:text-gray-200 dark:bg-gray-700"
                     required
                   />

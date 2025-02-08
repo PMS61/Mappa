@@ -1,6 +1,5 @@
 "use server"
 import { cookies } from 'next/headers'
-
 export default async function loginAction(formData) {
   try {
     let res = await fetch("http://localhost:8000/auth/login", {
@@ -11,8 +10,12 @@ export default async function loginAction(formData) {
       body: JSON.stringify(formData),
     })
     let data = await res.json();
-    cookies().set('token', data.token)
-    return data.error
+    if (!data.error) {
+      cookies().set('token', data.token)
+      cookies().set('username', data.username)
+      return { success: true }
+    }
+    return { success: false }
   }
   catch (e) {
     console.error({ message: e.message })

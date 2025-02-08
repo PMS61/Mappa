@@ -1,21 +1,22 @@
 "use client"
-
+import { useRouter } from "next/navigation"
 import React, { useState } from 'react'
 import loginAction from '@/actions/login'
 const Page = () => {
+  const router = useRouter()
   let [formData, setFormData] = useState({})
   let [error, setError] = useState(false)
   const handleRegister = async (e) => {
     e.preventDefault()
     try {
-      let error = await loginAction(formData)
-      setError(error)
+      let response = await loginAction(formData)
+      if (response.success) router.push("/dashboard")
+      else setError(response.success)
     }
     catch (e) {
       console.log(e)
     }
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 p-6 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e]">
       <div className="hero min-h-screen">

@@ -10,3 +10,12 @@ class RoomRequestModel(BaseModel):
 class RoomResponseModel(BaseModel):
     error: bool
     message: str
+
+
+class RoomAndPathRequestModel(BaseModel):
+    repo_id: str
+
+class RoomAndPathResponseModel(BaseModel):
+    error: bool
+    message: str
+    rooms: list[dict[str, str]]

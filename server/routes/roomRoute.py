@@ -3,7 +3,7 @@ from supabase import create_client, Client
 import os
 import uuid
 import logging
-from models import RoomRequestModel, RoomResponseModel
+from models import RoomRequestModel, RoomResponseModel, RoomAndPathRequestModel, RoomAndPathResponseModel
 
 router = APIRouter()
 
@@ -34,3 +34,13 @@ async def create_room(req: RoomRequestModel):
     # logger.info(f"Room created successfully with ID {req.room_id}")
     
     return {"error": False, "message": "Room created successfully"}
+
+@router.post("/get-room-and-path", response_model=RoomAndPathResponseModel)
+async def get_room_and_path(req: RoomAndPathRequestModel):
+    response = supabase.table("room").select("*").eq("repo_id", req.repo_id).execute()
+    if not response.data:
+        logger.error(f"Failed to get room and path: {response.error.message}")
+        raise HTTPException(status_code=500, detail=f"Failed to get room and path: {response.error.message}")
+    
+    rooms = [{"room_id": room["room_id"], "path": room["path"]} for room in response.data]
+    return {"error": False, "message": "Rooms and paths retrieved successfully", "rooms": rooms}
