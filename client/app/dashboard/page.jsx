@@ -5,7 +5,7 @@ import CardWithModal from "./repoCard";
 import Button from "./Button";
 import Cookies from "js-cookie";
 import createRepoAction from "@/actions/newRepo";
-import fetchReposAction from "@/actions/allRepos"; // Import the fetchReposAction function
+import fetchReposAction from "@/actions/allRepos"; // Ensure correct import path
 
 const Page = () => {
   const [username, setUsername] = useState("");
