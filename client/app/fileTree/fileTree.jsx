@@ -28,7 +28,7 @@ const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContex
     );
 };
 
-const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick }) => {
+const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handleFileClick }) => {
     const [collapsed, setCollapsed] = useState({});
     const [contextMenu, setContextMenu] = useState(null);
 
@@ -81,7 +81,7 @@ const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick }) => 
 
         parts.forEach((part, index) => {
             if (!current[part]) {
-                current[part] = { children: {}, isFile: false };
+                current[part] = { children: {}, isFile: false, roomId: obj.room_id };
             }
             if (index === parts.length - 1) {
                 current[part].isFile = true;
@@ -100,7 +100,7 @@ const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick }) => 
                         name={key} 
                         isFile={blocks[key].isFile} 
                         depth={depth} 
-                        onToggle={() => toggleCollapse(path)} 
+                        onToggle={() => blocks[key].isFile ? handleFileClick(blocks[key].roomId) : toggleCollapse(path)} 
                         isCollapsed={isCollapsed} 
                         onContextMenu={(e) => handleContextMenu(e, path, blocks[key].isFile)}
                     />
@@ -172,10 +172,31 @@ export default function FileTree({ paths, room }) {
         setLocalPaths(paths); // Update localPaths when paths prop changes
     }, [paths]);
 
-    const createFile = (parentPath, fileName) => {
-        const newPath = parentPath ? `${parentPath}/${fileName}` : fileName;
+    const getRoomId = async (room, path) => {
+        const res = await fetch('http://localhost:8000/room/create-new-file', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ "repo_id": room, "path": path }),
+          })
+
+        if (res.status === 200) {
+            const data = await res.json();
+            console.log(data);
+            return data.room_id;
+        }
+
+    };
+
+    const createFile = async (room, parentPath, fileName) => {
+        const newPath = parentPath ? `${parentPath}/${fileName}` : 
+        fileName;
+
+        const roomId = await getRoomId(room, newPath);
+
         const newPathObj = {
-            room_id: Date.now().toString(),
+            room_id: roomId,
             path: newPath
         };
         const updatedPaths = [...localPaths, newPathObj];
@@ -192,17 +213,22 @@ export default function FileTree({ paths, room }) {
         createFolder(path, folderName, localPaths, setLocalPaths, null, room);
     };
 
+    const handleFileClick = (roomId) => {
+        console.log(roomId);
+    };
+
     return (
         <>
             <TreeView 
                 paths={localPaths} 
                 handleCreateFileClick={handleCreateFileClick} 
                 handleCreateFolderClick={handleCreateFolderClick} 
+                handleFileClick={handleFileClick}
             />
             <CreateFileModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={(fileName) => createFile(currentPath, fileName)}
+                onSubmit={(fileName) => createFile(room, currentPath, fileName)}
             />
         </>
     );
