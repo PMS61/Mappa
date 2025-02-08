@@ -26,7 +26,7 @@ app.add_middleware(
 )
 app.include_router(auth_router, prefix="/auth")
 app.include_router(repo_router, prefix="/repo")
-app.include_router(arepo_router, prefix="/repo")
+# app.include_router(arepo_router, prefix="/repo")
 app.include_router(room_router, prefix="/room")
 app.include_router(access_router, prefix="/access")
 
