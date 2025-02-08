@@ -9,10 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@codemirror/lang-python": "^6.1.7",
+    "@codemirror/state": "^6.5.2",
+    "@liveblocks/client": "^2.17.0",
+    "@liveblocks/node": "^2.17.0",
+    "@liveblocks/react": "^2.17.0",
+    "@liveblocks/yjs": "^2.17.0",
+    "codemirror": "^6.0.1",
+    "liveblocks": "^0.0.3",
     "next": "14.2.23",
     "react": "^18",
     "react-dom": "^18",
-    "react-icons": "^5.4.0"
+    "react-icons": "^5.4.0",
+    "y-codemirror.next": "^0.3.5",
+    "yjs": "^13.6.23"
   },
   "devDependencies": {
     "@types/node": "^20",
