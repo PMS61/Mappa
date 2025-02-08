@@ -4,3 +4,4 @@ from .userModel import userReqMod,userResMod
 from .repoModel import RepoRequestModel,RepoResponseModel,FileRequestModel,FileResponseModel
 from .roomModel import RoomRequestModel,RoomResponseModel, RoomAndPathRequestModel, RoomAndPathResponseModel, NewFileRequestModel, NewFileResponseModel
 from .accessModel import AccessRequestModel,AccessResponseModel
+from .versionModel import PostVersionModel,GetVersionModel, GetVersionResponseModel, ReadVersionModel, ReadVersionResponseModel
