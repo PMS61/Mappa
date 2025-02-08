@@ -3,6 +3,7 @@ from supabase import create_client, Client
 import os
 import uuid
 from models import RepoRequestModel, RepoResponseModel
+from models import FileRequestModel, FileResponseModel
 
 router = APIRouter()
 
@@ -15,12 +16,12 @@ async def create_repo(req: RepoRequestModel):
     repo_id = str(uuid.uuid4())
     response = supabase.table("repo").insert({
         "repo_id": repo_id,
-        "userid": req.userid,
-        "repository_name": req.repository_name
+        "uid": req.userid,
+        "repo_name": req.repository_name
     }).execute()
-    if response.error:
-        raise HTTPException(status_code=500, detail="Failed to create repository")
-    return {"error": False, "repo_id": repo_id, "message": "Repository created successfully"}
+    if not response.data:  # Check if data was not inserted
+        raise HTTPException(status_code=500, detail=f"Failed to create repository: {response}")
+    return {"error": False, "repo_id": repo_id}
 
 @router.post("/create-file", response_model=FileResponseModel)
 async def create_file(req: FileRequestModel):
@@ -32,6 +33,6 @@ async def create_file(req: FileRequestModel):
         "content": req.content,
         "version": req.version
     }).execute()
-    if response.error:
-        raise HTTPException(status_code=500, detail="Failed to create file entry")
-    return {"error": False, "file_id": file_id, "message": "File entry created successfully"}
+    if not response.data:  # Check if data was not inserted
+        raise HTTPException(status_code=500, detail=f"Failed to create file: {response}")
+    return {"error": False, "file_id": file_id}

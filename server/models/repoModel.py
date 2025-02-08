@@ -8,7 +8,6 @@ class RepoRequestModel(BaseModel):
 class RepoResponseModel(BaseModel):
     error: bool
     repo_id: str
-    message: str
 
 class FileRequestModel(BaseModel):
     repo_id: str
@@ -19,4 +18,3 @@ class FileRequestModel(BaseModel):
 class FileResponseModel(BaseModel):
     error: bool
     file_id: str
-    message: str
