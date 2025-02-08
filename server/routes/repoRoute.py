@@ -4,7 +4,6 @@ import os
 import uuid
 from models import RepoRequestModel, RepoResponseModel
 from models import FileRequestModel, FileResponseModel
-from auth import jwt_decode
 
 router = APIRouter()
 
@@ -17,7 +16,7 @@ async def create_repo(req: RepoRequestModel):
     repo_id = str(uuid.uuid4())
     response = supabase.table("repo").insert({
         "repo_id": repo_id,
-        "uid": jwt_decode(req.uid),
+        "uid": req.uid,
         "repo_name": req.repo_name
     }).execute()
     if not response.data:  # Check if data was not inserted

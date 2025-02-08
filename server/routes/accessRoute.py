@@ -3,7 +3,7 @@ from supabase import create_client, Client
 import os
 import logging
 from models import AccessRequestModel, AccessResponseModel
-
+from auth import jwt_decode
 router = APIRouter()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")

@@ -25,6 +25,7 @@ const Page = () => {
         const result = await fetchReposAction();
         if (result.success) {
           setRepositories(result.repos);
+          console.log(result.repos);
         } else {
           console.error(result.error);
         }
@@ -80,7 +81,7 @@ const Page = () => {
                 index={index}
                 icon="📁"
                 label={repo.repo_name}
-                value={`Repository ${index + 1}`}
+                value={repo.repo_id}
                 color="from-blue-50 to-blue-100 dark:from-blue-700 dark:to-blue-500"
               />
             ))}

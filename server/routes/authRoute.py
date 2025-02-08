@@ -19,8 +19,7 @@ async def login(req: loginReqMod):
     user = response.data
     if not verify_hash_pass(req.password, user["password"]):
         return {"error": True, "token": ""}
-    token = jwt_encode(user["uid"])
-    return {"error": False, "token": token,"username":user["username"]}
+    return {"error": False, "token": user["uid"],"username":user["username"]}
 
 @router.post("/register", response_model=userResMod)
 async def register(req: userReqMod):
@@ -35,5 +34,4 @@ async def register(req: userReqMod):
         "username":req.username
     }).execute()
     user_id = response.data[0]["uid"]
-    token = jwt_encode(user_id)
-    return {"error": False, "token": token,"username":req.username}
+    return {"error": False, "token": user_id,"username":req.username}
