@@ -14,9 +14,7 @@ const Codespace = () => {
   const [room, setRoom] = useState('default-room'); 
   const [repoName, setRepoName] = useState('default-repo');
 
-  const [fileroom, setFileRoom] = useState('default-room');
-
-  const [room_and_file_array, setRoomAndFileArray] = useState([
+  const [tabs, setTabs] = useState([
     { id: "hello", name: "index.js" },
     { id: "2", name: "styles.css" },
   ]);
@@ -47,7 +45,10 @@ const Codespace = () => {
       
       <Panel defaultSize={60} minSize={30}>
         <Editor 
-          room={fileroom}
+          tabs={tabs}
+          setTabs={setTabs}
+          activeTab={active_state}
+          setActiveTab={setActiveState}
         />
       </Panel>
       

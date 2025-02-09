@@ -14,14 +14,14 @@ import { EditorTabs } from "./EditorTabs";
 import { CommitModal } from "./CommitModal";
 
 // Collaborative code editor with file tabs, live cursors, and live avatars
-export function CollaborativeEditor() {
+export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
   const room = useRoom();
   const [element, setElement] = useState<HTMLElement>();
-  const [tabs, setTabs] = useState([
-    { id: "1", name: "index.js" },
-    { id: "2", name: "styles.css" },
-  ]);
-  const [activeTab, setActiveTab] = useState("1");
+  // const [tabs, setTabs] = useState([
+  //   { id: "1", name: "index.js" },
+  //   { id: "2", name: "styles.css" },
+  // ]);
+  // const [activeTab, setActiveTab] = useState("1");
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
 
   // Get user info from Liveblocks authentication endpoint
