@@ -64,7 +64,6 @@ const Page = () => {
           {[
             { title: "Secure", icon: "🔒", desc: "Your data is safe with us" },
             { title: "Fast", icon: "⚡", desc: "Lightning quick responses" },
-            { title: "24/7 Support", icon: "💬", desc: "We're here to help" },
           ].map((feature, index) => (
             <div
               key={index}
