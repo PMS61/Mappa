@@ -162,7 +162,7 @@ const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handl
     );
 };
 
-export default function FileTree({ paths, room, repoName }) {
+export default function FileTree({ paths, room, repoName, addfile }) {
     console.log(paths);
     console.log(room, repoName);
     const [localPaths, setLocalPaths] = useState(paths);
@@ -223,7 +223,11 @@ export default function FileTree({ paths, room, repoName }) {
     };
 
     const handleFileClick = (roomId) => {
-        console.log(roomId);
+        const file = localPaths.find(path => path.room_id === roomId);
+        if (file) {
+            const filename = file.path.split('/').pop();
+            addfile({ id: roomId, name: filename });
+        }
     };
 
     return (

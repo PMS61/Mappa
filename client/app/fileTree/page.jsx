@@ -3,22 +3,13 @@
 import React, { useEffect, useState } from 'react'
 import FileTree from '../fileTree/fileTree'
 
-const Page = ({ room, repoName }) => {
+const Page = ({ room, repoName, tabs, setTabs, setActiveTab }) => {
 
   // const pathss=["F1/F2/f3", "F1/f8", "F3/F4/f5", "F3/F4/f6", "F3/F7/f8", "F9/f10", "F11/F12/f13", "F11/F12/f14", "F11/F15/f16", "F11/F15/f17"];
 
   const [paths, setPaths] = useState([]);
 
   const getPaths = async () => {
-    // POST 
-    // fetch('/api/filetree', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ repoId }),
-    // })
-
     const res = await fetch('http://localhost:8000/room/get-room-and-path', {
       method: 'POST',
       headers: {
@@ -35,6 +26,14 @@ const Page = ({ room, repoName }) => {
       setPaths(data.rooms);
     }
   }
+
+  const addfile = (entry) => {
+    // console.log(entry);
+    // console.log(tabs);
+    // console.log([...tabs, entry]);
+    setTabs([...tabs, entry]);
+    setActiveTab(entry.id);
+  }
   
   useEffect(
     () => {
@@ -45,12 +44,7 @@ const Page = ({ room, repoName }) => {
     console.log(paths);
   }, [paths]);
 
-  // const pathss = [{"room_id":"testid1", "path":"F1/F2/f3"},
-  //                 {"room_id":"testid2", "path":"F1/f8"},
-  //                 {"room_id":"testid3", "path":"F3/F4/f5"},
-  //                 {"room_id":"testid4", "path":"F3/F4/f6"}];
 
-  // console.log(pathss);
 
   console.log(paths, room, repoName);
 
@@ -59,6 +53,7 @@ const Page = ({ room, repoName }) => {
       paths={paths} 
       room={room}
       repoName={repoName}
+      addfile={addfile}
     />
     // <></>
   )
