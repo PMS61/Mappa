@@ -13,7 +13,7 @@ export default async function readVersionAction(version) {
     if (res.status === 200 && !res.data.error) {
       return {
         success: true,
-        data: res.data,
+        data: res.data.files[0],
       };
     }
     return { success: false, error: res.data.detail };

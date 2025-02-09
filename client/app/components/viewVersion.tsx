@@ -36,6 +36,7 @@ const VersionPage = () => {
     setSelectedRow(index);
   };
 
+  const [readVer, setReadVer] = useState({});
   const handleReadOnly = async () => {
     setIsModalOpen(false);
     setIsReadOnlyModalOpen(true);
@@ -43,14 +44,11 @@ const VersionPage = () => {
       const { success, data } = await readVersionAction(getVer);
       if (success) {
         console.log(data);
+        setReadVer(data);
       }
     } catch (e) {
       console.log(e);
     }
-  };
-
-  const handleRevert = () => {
-    alert("Revert: " + JSON.stringify(dummyData[selectedRow]));
   };
 
   return (
@@ -111,10 +109,7 @@ const VersionPage = () => {
                 >
                   Read Only
                 </button>
-                <button
-                  onClick={handleRevert}
-                  className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-                >
+                <button className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600">
                   Revert
                 </button>
               </div>
@@ -136,13 +131,10 @@ const VersionPage = () => {
               Read Only Version Details
             </h2>
             <p className="text-gray-800 dark:text-gray-200">
-              <strong>Version:</strong> {"yess"}
+              <strong>Path:</strong> {readVer?.path}
             </p>
             <p className="text-gray-800 dark:text-gray-200">
-              <strong>Description:</strong> {"oooo"}
-            </p>
-            <p className="text-gray-800 dark:text-gray-200">
-              <strong>Username:</strong> {"yooooooo"}
+              <strong>Content:</strong> {readVer?.content}
             </p>
             <button
               onClick={toggleReadOnlyModal}
