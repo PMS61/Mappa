@@ -12,11 +12,12 @@ const Page = () => {
             Mappa ✨
           </h1>
           <p
-            className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto animate-fadeIn dark:text-blue-300"
+            className="text-3xl text-gray-600 mb-12 max-w-3xl mx-auto animate-fadeIn dark:text-blue-300"
             style={{ animationDelay: "0.2s" }}
           >
-            Join our amazing community and experience the best service we have
-            to offer. Simple, secure, and delightful!
+            A Web-based IDE that ensures seamless real-time collaboration,
+            intelligent conflict resolution, structured project management, and
+            offline editing.
           </p>
         </div>
 
@@ -84,26 +85,6 @@ const Page = () => {
           style={{ animationDelay: "0.8s" }}
         >
           <p>© 2024 Our Platform. All rights reserved. ✨</p>
-          <div className="mt-4 space-x-4">
-            <a
-              href="/privacy"
-              className="hover:text-yellow-700 dark:hover:text-blue-500"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="/terms"
-              className="hover:text-yellow-700 dark:hover:text-purple-500"
-            >
-              Terms of Service
-            </a>
-            <a
-              href="/contact"
-              className="hover:text-yellow-700 dark:hover:text-green-500"
-            >
-              Contact Us
-            </a>
-          </div>
         </footer>
       </div>
     </div>

@@ -47,9 +47,9 @@ const VersionPage = () => {
     <div className="absolute bottom-5 left-5">
       <button
         onClick={toggleModal}
-        className="bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-xl"
+        className="bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 dark:bg-blue-500 dark:hover:bg-blue-600"
       >
-        Open Modal
+        Commit History
       </button>
 
       {isModalOpen && (
