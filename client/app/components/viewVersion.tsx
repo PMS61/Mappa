@@ -127,14 +127,15 @@ const VersionPage = () => {
       {isReadOnlyModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-8 rounded-lg shadow-lg dark:bg-gray-800">
-            <h2 className="text-2xl font-bold mb-4">
+            <h2 className="text-2xl dark:text-white font-bold mb-4">
               Read Only Version Details
             </h2>
             <p className="text-gray-800 dark:text-gray-200">
               <strong>Path:</strong> {readVer?.path}
             </p>
             <p className="text-gray-800 dark:text-gray-200">
-              <strong>Content:</strong> {readVer?.content}
+              <strong>Content:</strong>
+              <pre className="whitespace-pre-wrap">{readVer?.content}</pre>
             </p>
             <button
               onClick={toggleReadOnlyModal}
