@@ -46,17 +46,20 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
   const handleCommit = async (message: string) => {
     const uid = Cookies.get("username");
     const repoId = Cookies.get("repo_id"); // Get repo_id from cookies
-    const ytext = ydoc.getText("codemirror").toString(); // Get the content from Yjs document
+    const activeYDoc = getYDoc(activeTab); // Get the Yjs document for the active tab
+    const ytext = activeYDoc.getText("codemirror").toString(); // Get the content from the active Yjs document
+    const filePath = Cookies.get(`file_${activeTab}`); // Get the file path from cookies
+    console.log("Active Tab ID:", activeTab); // Log active tab ID for debugging
     console.log("Ytext:", ytext); // Log Yjs content for debugging
+    console.log("File Path:", filePath); // Log file path for debugging
 
-    
     const commitData = {
       repo_id: repoId,
       uid: uid,
       commit: message,
       files: [
         {
-          path: "mappa/main.py",
+          path: filePath,
           content: ytext,
         },
       ],
@@ -75,6 +78,7 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
 
       if (res.status === 200) {
         console.log("Commit successful");
+        alert("Commit successful!"); // Show alert on successful commit
       } else {
         console.error("Commit failed");
       }
@@ -209,6 +213,9 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
       state,
       parent: element,
     });
+
+    // Log the initial content of the Yjs document
+    console.log("Initial Ytext for active tab:", ytext.toString());
 
     return () => {
       provider?.destroy();
