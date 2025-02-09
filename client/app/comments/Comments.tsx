@@ -37,7 +37,22 @@ export default function Comments() {
         {threads?.map((thread) => (
           <div key={thread.id} className="bg-gray-50 rounded-xl p-4 shadow-sm border border-gray-200">
             {/* Thread Header */}
-            
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+                {thread.author?.name?.charAt(0) || "A"}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {thread.author?.name || "Anonymous"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {thread.createdAt 
+                    ? formatDistanceToNow(new Date(thread.createdAt.toString()), { 
+                        addSuffix: true 
+                      }) 
+                    : "Just now"}
+                </p>
+              </div>
             </div>
 
             {/* Thread Content */}
