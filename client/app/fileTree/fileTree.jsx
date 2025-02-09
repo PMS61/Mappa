@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { FaFolder, FaFolderOpen, FaFile } from "react-icons/fa";
 import CreateFileModal from "./CreateFileModal";
 import { createFolder } from "./folderUtils";
+import { useRouter } from "next/navigation";
 
 const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContextMenu }) => {
     if (name == ".hidden") return null;
@@ -28,7 +29,7 @@ const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContex
     );
 };
 
-const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handleFileClick }) => {
+const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handleFileClick, repoName }) => {
     const [collapsed, setCollapsed] = useState({});
     const [contextMenu, setContextMenu] = useState(null);
 
@@ -151,9 +152,16 @@ const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handl
         )
     );
 
+    const router = useRouter();
+
     return (
         <div className="h-full bg-white dark:bg-gray-800 flex flex-col">
-            <h2 className="text-xl font-bold py-2 text-center text-gray-700 dark:text-gray-200 border-b">Directory Tree</h2>
+            <div 
+                className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-md"
+                onClick={() => router.push('/dashboard')}
+            >
+                <h2 className="text-xl font-bold py-2 text-center text-gray-700 dark:text-gray-200 border-b">{repoName}</h2>
+            </div>
             <div className="overflow-y-auto flex-1 p-1">
                 {renderBlocks(blocks)}
             </div>
@@ -237,6 +245,7 @@ export default function FileTree({ paths, room, repoName, addfile }) {
                 handleCreateFileClick={handleCreateFileClick} 
                 handleCreateFolderClick={handleCreateFolderClick} 
                 handleFileClick={handleFileClick}
+                repoName={repoName}
             />
             <CreateFileModal
                 isOpen={isModalOpen}
