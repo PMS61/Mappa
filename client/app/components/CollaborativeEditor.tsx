@@ -44,7 +44,7 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
   }, []);
 
   const handleCommit = async (message: string) => {
-    const uid = localStorage.getItem("uname");
+    const uid = Cookies.get("username");
     const repoId = Cookies.get("repo_id"); // Get repo_id from cookies
     const ytext = ydoc.getText("codemirror").toString(); // Get the content from Yjs document
     console.log("Ytext:", ytext); // Log Yjs content for debugging
