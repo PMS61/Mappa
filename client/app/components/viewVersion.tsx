@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import getVersionAction from "@/actions/getVersions";
+import readVersionAction from "@/actions/readVersion";
 const VersionPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReadOnlyModalOpen, setIsReadOnlyModalOpen] = useState(false);
@@ -29,14 +30,23 @@ const VersionPage = () => {
     },
     { version: "1.2.0", description: "Bug fixes", username: "tester" },
   ];
-
-  const handleRowClick = (index) => {
+  const [getVer, setVer] = useState();
+  const handleRowClick = (index, version) => {
+    setVer(version);
     setSelectedRow(index);
   };
 
-  const handleReadOnly = () => {
+  const handleReadOnly = async () => {
     setIsModalOpen(false);
     setIsReadOnlyModalOpen(true);
+    try {
+      const { success, data } = await readVersionAction(getVer);
+      if (success) {
+        console.log(data);
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const handleRevert = () => {
@@ -78,7 +88,7 @@ const VersionPage = () => {
                     <tr
                       key={index}
                       className={`border-b dark:border-gray-700 cursor-pointer ${selectedRow === index ? "bg-yellow-200 dark:bg-gray-700" : ""}`}
-                      onClick={() => handleRowClick(index)}
+                      onClick={() => handleRowClick(index, row?.version)}
                     >
                       <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
                         {row?.version}
@@ -126,13 +136,13 @@ const VersionPage = () => {
               Read Only Version Details
             </h2>
             <p className="text-gray-800 dark:text-gray-200">
-              <strong>Version:</strong> {dummyData[selectedRow].version}
+              <strong>Version:</strong> {"yess"}
             </p>
             <p className="text-gray-800 dark:text-gray-200">
-              <strong>Description:</strong> {dummyData[selectedRow].description}
+              <strong>Description:</strong> {"oooo"}
             </p>
             <p className="text-gray-800 dark:text-gray-200">
-              <strong>Username:</strong> {dummyData[selectedRow].username}
+              <strong>Username:</strong> {"yooooooo"}
             </p>
             <button
               onClick={toggleReadOnlyModal}
