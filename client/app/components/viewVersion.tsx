@@ -6,7 +6,7 @@ const VersionPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReadOnlyModalOpen, setIsReadOnlyModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-
+  const [inpData, setInpData] = useState([]);
   const toggleModal = async (e) => {
     e.preventDefault();
     setIsModalOpen(!isModalOpen);
@@ -20,7 +20,6 @@ const VersionPage = () => {
   const toggleReadOnlyModal = () => {
     setIsReadOnlyModalOpen(!isReadOnlyModalOpen);
   };
-  const [inpData, setInpData] = useState([]);
   const dummyData = [
     { version: "1.0.0", description: "Initial release", username: "admin" },
     {
@@ -48,7 +47,7 @@ const VersionPage = () => {
     <div className="absolute bottom-5 left-5">
       <button
         onClick={toggleModal}
-        className="bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+        className="bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-xl"
       >
         Open Modal
       </button>
@@ -72,23 +71,24 @@ const VersionPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {inpData.map((row, index) => (
-                  <tr
-                    key={index}
-                    className={`border-b dark:border-gray-700 cursor-pointer ${selectedRow === index ? "bg-yellow-200 dark:bg-gray-700" : ""}`}
-                    onClick={() => handleRowClick(index)}
-                  >
-                    <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                      {row?.version}
-                    </td>
-                    <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                      {row?.commit}
-                    </td>
-                    <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                      {row?.uid}
-                    </td>
-                  </tr>
-                ))}
+                {inpData &&
+                  inpData.map((row, index) => (
+                    <tr
+                      key={index}
+                      className={`border-b dark:border-gray-700 cursor-pointer ${selectedRow === index ? "bg-yellow-200 dark:bg-gray-700" : ""}`}
+                      onClick={() => handleRowClick(index)}
+                    >
+                      <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
+                        {row?.version}
+                      </td>
+                      <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
+                        {row?.commit}
+                      </td>
+                      <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
+                        {row?.uid}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
             {selectedRow !== null && (
