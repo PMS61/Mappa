@@ -14,9 +14,11 @@ import { EditorTabs } from "./EditorTabs";
 import { CommitModal } from "./CommitModal";
 import { createNewRoom } from "../editor/Room";
 import Cookies from "js-cookie";
+import dynamic from "next/dynamic";
+const MergeEditor = dynamic(() => import("../merge-editor/page"), { ssr: false });
 
 // Collaborative code editor with file tabs, live cursors, and live avatars
-export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
+export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) {
   const room = useRoom();
   const [element, setElement] = useState<HTMLElement>();
   // const [tabs, setTabs] = useState([
@@ -27,6 +29,7 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
   const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
+  const [isMergeEditorOpen, setIsMergeEditorOpen] = useState(false);
 
   // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
@@ -52,6 +55,9 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
     console.log("Active Tab ID:", activeTab); // Log active tab ID for debugging
     console.log("Ytext:", ytext); // Log Yjs content for debugging
     console.log("File Path:", filePath); // Log file path for debugging
+
+    // Store ytext in "alpha" cookie after commit
+    Cookies.set("alpha", ytext);
 
     const commitData = {
       repo_id: repoId,
@@ -217,11 +223,16 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
     // Log the initial content of the Yjs document
     console.log("Initial Ytext for active tab:", ytext.toString());
 
+    // Update "beta" cookie whenever the text is edited
+    ytext.observe(() => {
+      Cookies.set("beta", ytext.toString());
+    });
+
     return () => {
       provider?.destroy();
       view?.destroy();
     };
-  }, [element, room, userInfo, activeTab]); // Add activeTab as dependency
+  }, [element, room, userInfo, activeTab, getYDoc]); // Add getYDoc as dependency
 
   const handleCreateNewFile = async () => {
     try {
@@ -276,6 +287,22 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
           </div>
         </div>
       )}
+      {isMergeEditorOpen && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <MergeEditor />
+            <button onClick={() => setIsMergeEditorOpen(false)}>Close</button>
+          </div>
+        </div>
+      )}
+      <button
+        className="btn btn-danger"
+        onClick={() => setIsMergeEditorOpen(true)}
+        title="Merge conflicts"
+        style={{ position: "absolute", bottom: "10px", left: "10px" }}
+      >
+        Merge Conflicts
+      </button>
     </div>
   );
 }
