@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import FileTree from '../fileTree/fileTree'
 
-const Page = ({ room }) => {
+const Page = ({ room, repoName }) => {
 
   // const pathss=["F1/F2/f3", "F1/f8", "F3/F4/f5", "F3/F4/f6", "F3/F7/f8", "F9/f10", "F11/F12/f13", "F11/F12/f14", "F11/F15/f16", "F11/F15/f17"];
 
@@ -52,10 +52,13 @@ const Page = ({ room }) => {
 
   // console.log(pathss);
 
+  console.log(paths, room, repoName);
+
   return (
     <FileTree 
       paths={paths} 
       room={room}
+      repoName={repoName}
     />
     // <></>
   )

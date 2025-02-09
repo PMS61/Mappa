@@ -1,5 +1,5 @@
 "use client"
-
+import Cookies from 'js-cookie'
 import React, { useEffect, useState } from 'react'
 import FileTree from '../fileTree/page'
 import Chat from '../chat/page'
@@ -11,51 +11,44 @@ const ResizeHandle = () => {
 };
 
 const Codespace = () => {
-  const [room, setRoom] = useState('');
-  const [joined, setJoined] = useState(false);
+  const [room, setRoom] = useState('default-room'); 
+  const [repoName, setRepoName] = useState('default-repo');
 
+  const [fileroom, setFileRoom] = useState('default-room');
 
-  const handleJoinRoom = (e) => {
-    e.preventDefault();
-    if (room) {
-      setJoined(true);
+  const [room_and_file_array, setRoomAndFileArray] = useState([
+    { id: "hello", name: "index.js" },
+    { id: "2", name: "styles.css" },
+  ]);
+  const [active_state, setActiveState] = useState("hello");
+
+  useEffect(() => {
+    const repo_id = Cookies.get('repo_id');
+    const repo_name = Cookies.get('repo_name');
+    console.log('repo_id', repo_id);
+    console.log('repo_name', repo_name);
+    
+    if (repo_id && repo_name) {
+      setRoom(repo_id);
+      setRepoName(repo_name);
     }
-  };
-
-  if (!joined) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-        <form onSubmit={handleJoinRoom} className="p-6 bg-white dark:bg-gray-700 rounded-lg shadow-md">
-          <input
-            type="text"
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            placeholder="Enter room code"
-            className="w-full p-2 mb-4 border rounded dark:bg-gray-600 dark:text-white"
-          />
-          <button
-            type="submit"
-            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Join Room
-          </button>
-        </form>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <PanelGroup direction="horizontal">
       <Panel defaultSize={15} minSize={10}>
         <FileTree 
           room={room}
+          repoName={repoName}
         />
       </Panel>
       
       <ResizeHandle />
       
       <Panel defaultSize={60} minSize={30}>
-        <Editor />
+        <Editor 
+          room={fileroom}
+        />
       </Panel>
       
       <ResizeHandle />

@@ -39,6 +39,7 @@ const CardWithModal = ({ index, icon, label, value, color }) => {
       className={`p-4 rounded-lg shadow-lg bg-gradient-to-br ${color}`}
       onClick={() => {
         Cookies.set("repo_id", value, { expires: 10 });
+        Cookies.set("repo_name", label, { expires: 10 });
         router.push("/codespace");
         console.log(value);
       }}
