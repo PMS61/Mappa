@@ -6,12 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { ClientSideSuspense } from "@liveblocks/react";
 import { Loading } from "../components/Loading";
 
-export function Room({ children }: { children: ReactNode }) {
-  const roomId = useExampleRoomId("liveblocks:examples:nextjs-yjs-codemirror");
+export function Room({ children, roomId }: { children: ReactNode, roomId: string }) {
+  console.log("Room", roomId);
+  const finalRoomId = useExampleRoomId(roomId);
 
   return (
     <RoomProvider
-      id={roomId}
+      id={finalRoomId}
       initialPresence={{
         cursor: null,
       }}

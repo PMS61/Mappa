@@ -15,7 +15,12 @@ const Codespace = () => {
   const [room, setRoom] = useState("default-room");
   const [repoName, setRepoName] = useState("default-repo");
 
-  const [fileroom, setFileRoom] = useState("default-room");
+  const [tabs, setTabs] = useState([
+    { id: "hello", name: "index.js" },
+    { id: "2", name: "styles.css" },
+  ]);
+  const [active_state, setActiveState] = useState("hello");
+
   useEffect(() => {
     const repo_id = Cookies.get("repo_id");
     const repo_name = Cookies.get("repo_name");
@@ -36,7 +41,12 @@ const Codespace = () => {
       <ResizeHandle />
 
       <Panel defaultSize={60} minSize={30}>
-        <Editor room={fileroom} />
+        <Editor 
+          tabs={tabs}
+          setTabs={setTabs}
+          activeTab={active_state}
+          setActiveTab={setActiveState}
+        />
       </Panel>
 
       <ResizeHandle />

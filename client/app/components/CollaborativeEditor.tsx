@@ -16,14 +16,14 @@ import { createNewRoom } from "../editor/Room";
 import Cookies from 'js-cookie';
 
 // Collaborative code editor with file tabs, live cursors, and live avatars
-export function CollaborativeEditor() {
+export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
   const room = useRoom();
   const [element, setElement] = useState<HTMLElement>();
-  const [tabs, setTabs] = useState([
-    { id: "1", name: "index.js" },
-    { id: "2", name: "styles.css" },
-  ]);
-  const [activeTab, setActiveTab] = useState("1");
+  // const [tabs, setTabs] = useState([
+  //   { id: "1", name: "index.js" },
+  //   { id: "2", name: "styles.css" },
+  // ]);
+  // const [activeTab, setActiveTab] = useState("1");
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
   const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
