@@ -2,9 +2,15 @@
 
 import { RoomProvider } from "@/app/liveblocks.config.ts"; // Adjust the import path as needed
 import Comments from "./Comments"; // Adjust the import path as needed
+import { LiveblocksUIConfig } from "@liveblocks/react-ui";
+import Cookies from "js-cookie";    
 
 export default function CommentsPage() {
+    const username = Cookies.get("username");
   return (
+    <LiveblocksUIConfig
+    overrides={{ locale: "fr", USER_UNKNOWN: username?username:"Anonymous" /* ... */ }}
+  >
     <RoomProvider
       id="liveblocks:examples:nextjs-yjs-codemirror
 " // Replace with your actual room ID
@@ -13,5 +19,6 @@ export default function CommentsPage() {
     >
       <Comments />
     </RoomProvider>
+    </LiveblocksUIConfig>
   );
 }
