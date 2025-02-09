@@ -1,11 +1,5 @@
-import fs from "fs";
-import path from "path";
-
-const getFileContents = () => {
-  const aText = fs.readFileSync(path.join(process.cwd(), "app/merge-editor/a.txt"), "utf-8");
-  const bText = fs.readFileSync(path.join(process.cwd(), "app/merge-editor/b.txt"), "utf-8");
-  return { aText, bText };
-};
+"use client";
+import Cookies from "js-cookie";
 
 const computeDiff = (aLines, bLines) => {
   let dp = Array(aLines.length + 1)
@@ -41,6 +35,11 @@ const computeDiff = (aLines, bLines) => {
 };
 
 export default function Page() {
+  const getFileContents = () => ({
+    aText: Cookies.get("alpha") || "",
+    bText: Cookies.get("beta") || "",
+  });
+
   const { aText, bText } = getFileContents();
   const aLines = aText.split("\n");
   const bLines = bText.split("\n");
