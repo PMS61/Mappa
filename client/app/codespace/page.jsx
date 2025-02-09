@@ -1,10 +1,11 @@
-"use client"
-import Cookies from 'js-cookie'
-import React, { useEffect, useState } from 'react'
-import FileTree from '../fileTree/page'
-import Chat from '../chat/page'
-import Editor from '../editor/page'
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
+"use client";
+import Cookies from "js-cookie";
+import VersionPage from "../components/viewVersion";
+import React, { useEffect, useState } from "react";
+import FileTree from "../fileTree/page";
+import Chat from "../chat/page";
+import Editor from "../editor/page";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 const ResizeHandle = () => {
   return <PanelResizeHandle className="panel-resize-handle" />;
@@ -35,29 +36,29 @@ const Codespace = () => {
   }, []);
 
   return (
-    <PanelGroup direction="horizontal">
+    <PanelGroup direction="horizontal" className="relative">
       <Panel defaultSize={15} minSize={10}>
         <FileTree 
           room={room}
           repoName={repoName}
         />
       </Panel>
-      
       <ResizeHandle />
-      
+
       <Panel defaultSize={60} minSize={30}>
         <Editor 
           room={fileroom}
         />
       </Panel>
-      
+
       <ResizeHandle />
-      
+
       <Panel defaultSize={25} minSize={15}>
         <Chat />
       </Panel>
+      <VersionPage />
     </PanelGroup>
   );
-}
+};
 
-export default Codespace
+export default Codespace;

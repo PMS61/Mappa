@@ -12,6 +12,7 @@ import styles from "./CollaborativeEditor.module.css";
 import { Avatars } from "./Avatars";
 import { EditorTabs } from "./EditorTabs";
 import { CommitModal } from "./CommitModal";
+import { createNewRoom } from "../editor/Room";
 
 // Collaborative code editor with file tabs, live cursors, and live avatars
 export function CollaborativeEditor() {
@@ -23,6 +24,8 @@ export function CollaborativeEditor() {
   ]);
   const [activeTab, setActiveTab] = useState("1");
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
+  const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
 
   // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
@@ -143,6 +146,18 @@ export function CollaborativeEditor() {
     };
   }, [element, room, userInfo]);
 
+  const handleCreateNewFile = async () => {
+    try {
+      const newRoomId = await createNewRoom(newFileName);
+      setTabs([...tabs, { id: newRoomId, name: newFileName }]);
+      setActiveTab(newRoomId);
+      setIsNewFileModalOpen(false);
+      setNewFileName("");
+    } catch (error) {
+      console.error("Failed to create new file:", error);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.editorHeader}>
@@ -172,6 +187,13 @@ export function CollaborativeEditor() {
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
           </button>
+          <button
+            className={styles.newFileButton}
+            onClick={() => setIsNewFileModalOpen(true)}
+            title="Create new file"
+          >
+            +
+          </button>
         </div>
         <Avatars />
       </div>
@@ -181,6 +203,21 @@ export function CollaborativeEditor() {
         onClose={() => setIsCommitModalOpen(false)}
         onCommit={handleCommit}
       />
+      {isNewFileModalOpen && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h2>Create New File</h2>
+            <input
+              type="text"
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              placeholder="Enter file name"
+            />
+            <button onClick={handleCreateNewFile}>Create</button>
+            <button onClick={() => setIsNewFileModalOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

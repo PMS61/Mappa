@@ -55,7 +55,7 @@ const CardWithModal = ({ index, icon, label, value, color }) => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowAddCollabModal(true)}
-            className="btn bg-blue-100 text-blue-800 hover:bg-blue-200 px-2 py-1 rounded-full dark:bg-blue-700 dark:text-blue-200 dark:hover:bg-blue-600"
+            className="btn btn-warning"
           >
             Add Collaborator
           </button>

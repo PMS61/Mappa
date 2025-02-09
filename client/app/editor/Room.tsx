@@ -21,6 +21,23 @@ export function Room({ children }: { children: ReactNode }) {
   );
 }
 
+export async function createNewRoom(fileName: string) {
+  const response = await fetch("/api/create-room", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fileName }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create new room");
+  }
+
+  const { roomId } = await response.json();
+  return roomId;
+}
+
 /**
  * This function is used when deploying an example on liveblocks.io.
  * You can ignore it completely if you run the example locally.
