@@ -55,7 +55,9 @@ const VersionPage = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-8 rounded-lg shadow-lg dark:bg-gray-800">
-            <h2 className="text-2xl font-bold mb-4">Version Information</h2>
+            <h2 className="text-2xl dark:text-white font-bold mb-4">
+              Version Information
+            </h2>
             <table className="min-w-full bg-white dark:bg-gray-800 text-center">
               <thead>
                 <tr>
