@@ -9,7 +9,7 @@ export default function Comments() {
   const { threads } = useThreads();
 
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white rounded-xl shadow-sm">
+    <div className="p-6 max-w-3xl mx-auto bg-white rounded-xl shadow-sm h-screen overflow-auto">
       {/* New Discussion Section */}
       <div className="mb-8">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Start New Discussion</h2>

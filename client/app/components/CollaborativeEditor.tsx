@@ -32,6 +32,17 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
   const userInfo = useSelf((me) => me.info);
   const ydoc = useRef(new Y.Doc()).current; // Use useRef to ensure a single instance
 
+  // Create a map to store ydocs for each tab
+  const ydocsRef = useRef<Map<string, Y.Doc>>(new Map());
+
+  // Get or create ydoc for current tab
+  const getYDoc = useCallback((tabId: string) => {
+    if (!ydocsRef.current.has(tabId)) {
+      ydocsRef.current.set(tabId, new Y.Doc());
+    }
+    return ydocsRef.current.get(tabId)!;
+  }, []);
+
   const handleCommit = async (message: string) => {
     const uid = localStorage.getItem("uname");
     const repoId = Cookies.get("repo_id"); // Get repo_id from cookies
@@ -81,8 +92,14 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
     setActiveTab(id);
   };
 
+  // Clean up ydoc when tab is closed
   const handleTabClose = (id: string) => {
     if (tabs.length > 1) {
+      const ydoc = ydocsRef.current.get(id);
+      if (ydoc) {
+        ydoc.destroy();
+        ydocsRef.current.delete(id);
+      }
       setTabs(tabs.filter((tab) => tab.id !== id));
       if (activeTab === id) {
         setActiveTab(tabs[0].id);
@@ -150,9 +167,11 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
     let provider: LiveblocksYjsProvider;
     let view: EditorView;
 
-    if (!element || !room || !userInfo) {
+    if (!element || !room || !userInfo || !activeTab) {
       return;
     }
+
+    const ydoc = getYDoc(activeTab);
 
     // Create Yjs provider and document
     provider = new LiveblocksYjsProvider(room as any, ydoc);
@@ -192,11 +211,10 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
     });
 
     return () => {
-      ydoc?.destroy();
       provider?.destroy();
       view?.destroy();
     };
-  }, [element, room, userInfo]);
+  }, [element, room, userInfo, activeTab]); // Add activeTab as dependency
 
   const handleCreateNewFile = async () => {
     try {
