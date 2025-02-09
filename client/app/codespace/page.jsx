@@ -17,10 +17,9 @@ const Codespace = () => {
   const [repoName, setRepoName] = useState("default-repo");
 
   const [tabs, setTabs] = useState([
-    { id: "hello", name: "index.js" },
-    { id: "2", name: "styles.css" },
+    { id: "welcome", name: "Welcome!!" },
   ]);
-  const [active_state, setActiveState] = useState("hello");
+  const [active_state, setActiveState] = useState("welcome");
 
   useEffect(() => {
     const repo_id = Cookies.get("repo_id");
@@ -37,7 +36,13 @@ const Codespace = () => {
   return (
     <PanelGroup direction="horizontal" className="relative">
       <Panel defaultSize={15} minSize={10}>
-        <FileTree room={room} repoName={repoName} />
+        <FileTree 
+          room={room} 
+          repoName={repoName}
+          tabs={tabs}
+          setTabs={setTabs}
+          setActiveTab={setActiveState}  
+        />
       </Panel>
       <ResizeHandle />
 

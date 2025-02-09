@@ -30,7 +30,7 @@ async def add_repo(req: NewRepoRequest):
 
     # Add the new repository
     repo_data = {
-        "repo_id":str(uuid.uuid4()),
+        "repo_id":req.repo_id,
         "uid": uid,
         "repo_name": req.repo_name
     }
