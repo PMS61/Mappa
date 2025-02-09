@@ -114,7 +114,9 @@ const Page = () => {
             ) : (
               ""
             )}
-            <h2 className="text-xl font-bold mb-4">Create a New Repository</h2>
+            <h2 className="text-xl dark:text-white font-bold mb-4">
+              Create a New Repository
+            </h2>
             <input
               type="text"
               value={newRepoName}
