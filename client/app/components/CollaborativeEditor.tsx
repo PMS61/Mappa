@@ -13,7 +13,7 @@ import { Avatars } from "./Avatars";
 import { EditorTabs } from "./EditorTabs";
 import { CommitModal } from "./CommitModal";
 import { createNewRoom } from "../editor/Room";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 // Collaborative code editor with file tabs, live cursors, and live avatars
 export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
@@ -33,8 +33,8 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
   const ydoc = useRef(new Y.Doc()).current; // Use useRef to ensure a single instance
 
   const handleCommit = async (message: string) => {
-    const uid = localStorage.getItem('uname');
-    const repoId = Cookies.get('repo_id'); // Get repo_id from cookies
+    const uid = localStorage.getItem("uname");
+    const repoId = Cookies.get("repo_id"); // Get repo_id from cookies
     const ytext = ydoc.getText("codemirror").toString(); // Get the content from Yjs document
     console.log("Ytext:", ytext); // Log Yjs content for debugging
 
@@ -137,10 +137,10 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
       setActiveTab(id);
     };
 
-    window.addEventListener('add-tab', handleAddTab);
+    window.addEventListener("add-tab", handleAddTab);
 
     return () => {
-      window.removeEventListener('add-tab', handleAddTab);
+      window.removeEventListener("add-tab", handleAddTab);
     };
   }, []);
 
@@ -220,30 +220,11 @@ export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
             onTabClose={handleTabClose}
           />
           <button
-            className={styles.commitButton}
+            className="btn btn-outline btn-accent"
             onClick={() => setIsCommitModalOpen(true)}
             title="Commit changes"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
-          <button
-            className={styles.newFileButton}
-            onClick={() => setIsNewFileModalOpen(true)}
-            title="Create new file"
-          >
-            +
+            Commit
           </button>
         </div>
         <Avatars />
