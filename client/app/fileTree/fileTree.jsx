@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FaFolder, FaFolderOpen, FaFile } from "react-icons/fa";
 import CreateFileModal from "./CreateFileModal";
 import { createFolder } from "./folderUtils";
@@ -162,15 +162,22 @@ const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handl
     );
 };
 
-export default function FileTree({ paths, room }) {
+export default function FileTree({ paths, room, repoName }) {
     console.log(paths);
+    console.log(room, repoName);
     const [localPaths, setLocalPaths] = useState(paths);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPath, setCurrentPath] = useState('');
 
     useEffect(() => {
-        setLocalPaths(paths); // Update localPaths when paths prop changes
-    }, [paths]);
+        console.log(paths, repoName, room);
+        if (paths.length > 0) setLocalPaths(paths); 
+        else {
+            const temp = [{"room_id": Date.now().toString(),"path": `${repoName}/.hidden`}]
+            console.log(temp);
+            setLocalPaths(temp);
+        }
+    }, [paths, repoName, room]); // Ensure the dependency array includes paths, repoName, and room
 
     const getRoomId = async (room, path) => {
         const res = await fetch('http://localhost:8000/room/create-new-file', {
