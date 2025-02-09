@@ -197,8 +197,7 @@ export default function FileTree({ paths, room, repoName }) {
     };
 
     const createFile = async (room, parentPath, fileName) => {
-        const newPath = parentPath ? `${parentPath}/${fileName}` : 
-        fileName;
+        const newPath = parentPath ? `${parentPath}/${fileName}` : fileName;
 
         const roomId = await getRoomId(room, newPath);
 
@@ -208,6 +207,9 @@ export default function FileTree({ paths, room, repoName }) {
         };
         const updatedPaths = [...localPaths, newPathObj];
         setLocalPaths(updatedPaths);
+
+        // Add the new file to the tabs in the CollaborativeEditor
+        window.dispatchEvent(new CustomEvent('add-tab', { detail: { id: roomId, name: fileName } }));
     };
 
     const handleCreateFileClick = (path) => {

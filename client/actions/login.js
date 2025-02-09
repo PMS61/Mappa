@@ -13,7 +13,11 @@ export default async function loginAction(formData) {
     if (!data.error) {
       cookies().set('token', data.token)
       cookies().set('username', data.username)
-      return { success: true }
+      // Store username in local storage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uname', data.username);
+      }
+      return { success: true, username: data.username } // Return username in the response
     }
     return { success: false }
   }

@@ -13,6 +13,10 @@ export default async function registerAction(formData) {
     if (!data.error) {
       cookies().set('token', data.token)
       cookies().set('username', data.username)
+      // Store username in local storage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uname', data.username);
+      }
       return { success: true }
     }
     return { success: false }
