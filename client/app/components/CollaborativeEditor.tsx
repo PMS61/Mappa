@@ -5,7 +5,7 @@ import { yCollab } from "y-codemirror.next";
 import { EditorView, basicSetup } from "codemirror";
 import { EditorState } from "@codemirror/state";
 import { javascript } from "@codemirror/lang-javascript";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { LiveblocksYjsProvider } from "@liveblocks/yjs";
 import { useRoom, useSelf } from "@liveblocks/react/suspense";
 import styles from "./CollaborativeEditor.module.css";
@@ -13,6 +13,7 @@ import { Avatars } from "./Avatars";
 import { EditorTabs } from "./EditorTabs";
 import { CommitModal } from "./CommitModal";
 import { createNewRoom } from "../editor/Room";
+import Cookies from 'js-cookie';
 
 // Collaborative code editor with file tabs, live cursors, and live avatars
 export function CollaborativeEditor() {
@@ -29,10 +30,47 @@ export function CollaborativeEditor() {
 
   // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
-  const handleCommit = (message: string) => {
-    // Implement your commit logic here
-    console.log("Committing with message:", message);
+  const ydoc = useRef(new Y.Doc()).current; // Use useRef to ensure a single instance
+
+  const handleCommit = async (message: string) => {
+    const uid = localStorage.getItem('uname');
+    const repoId = Cookies.get('repo_id'); // Get repo_id from cookies
+    const ytext = ydoc.getText("codemirror").toString(); // Get the content from Yjs document
+    console.log("Ytext:", ytext); // Log Yjs content for debugging
+
+    const commitData = {
+      repo_id: repoId,
+      uid: uid,
+      commit: message,
+      files: [
+        {
+          path: "mappa/main.py",
+          content: ytext,
+        },
+      ],
+    };
+
+    console.log("Commit Data:", commitData); // Log commit data for debugging
+
+    try {
+      const res = await fetch("http://localhost:8000/version/post-version", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(commitData),
+      });
+
+      if (res.status === 200) {
+        console.log("Commit successful");
+      } else {
+        console.error("Commit failed");
+      }
+    } catch (e) {
+      console.error("Error committing changes:", e);
+    }
   };
+
   const ref = useCallback((node: HTMLElement | null) => {
     if (!node) return;
     setElement(node);
@@ -91,10 +129,24 @@ export function CollaborativeEditor() {
     };
   }, [switchToNextTab, switchToPreviousTab]);
 
+  // Listen for the add-tab event and update the tabs state accordingly
+  useEffect(() => {
+    const handleAddTab = (event: CustomEvent) => {
+      const { id, name } = event.detail;
+      setTabs((prevTabs) => [...prevTabs, { id, name }]);
+      setActiveTab(id);
+    };
+
+    window.addEventListener('add-tab', handleAddTab);
+
+    return () => {
+      window.removeEventListener('add-tab', handleAddTab);
+    };
+  }, []);
+
   // Set up Liveblocks Yjs provider and attach CodeMirror editor
   useEffect(() => {
     let provider: LiveblocksYjsProvider;
-    let ydoc: Y.Doc;
     let view: EditorView;
 
     if (!element || !room || !userInfo) {
@@ -102,7 +154,6 @@ export function CollaborativeEditor() {
     }
 
     // Create Yjs provider and document
-    ydoc = new Y.Doc();
     provider = new LiveblocksYjsProvider(room as any, ydoc);
     const ytext = ydoc.getText("codemirror");
 

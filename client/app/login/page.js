@@ -15,6 +15,16 @@ const Page = () => {
       else setError(response.success);
     } catch (e) {
       console.log(e);
+      let response = await loginAction(formData)
+      if (response.success) {
+        // Store username in local storage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('uname', response.username); // Use response.username instead of formData.username
+        }
+        router.push("/dashboard")
+      } else {
+        setError(response.success)
+      }
     }
   };
   return (

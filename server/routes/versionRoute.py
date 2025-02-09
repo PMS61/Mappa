@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from supabase import create_client, Client
 import os
 import uuid
 from models import PostVersionModel, GetVersionModel, GetVersionResponseModel, ReadVersionModel, ReadVersionResponseModel
 from auth import jwt_decode
+import logging
 
 router = APIRouter()
 
@@ -11,32 +12,42 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+logger = logging.getLogger(__name__)
+
 @router.post("/post-version")
-async def post_version(req: PostVersionModel):
-    # Get the latest version
-    latest_version = supabase.table("versions").select("version") \
-        .eq("repo_id", req.repo_id).order("version", desc=True).limit(1).execute()
-    
-    new_version = (latest_version.data[0]["version"] + 1) if latest_version.data else 1
+async def post_version(req: PostVersionModel, request: Request):
+    try:
+        # Log the incoming request data
+        logger.info(f"Received request: {await request.json()}")
 
-    # Insert new version entry
-    response = supabase.table("versions").insert({
-        "repo_id": req.repo_id,
-        "version": new_version,
-        "uid": req.uid,
-        "commit": req.commit
-    }).execute()
+        # Get the latest version
+        latest_version = supabase.table("versions").select("version") \
+            .eq("repo_id", req.repo_id).order("version", desc=True).limit(1).execute()
+        
+        new_version = (latest_version.data[0]["version"] + 1) if latest_version.data else 1
 
-    if not response.data:
-        raise HTTPException(status_code=500, detail="Failed to create version")
+        # Insert new version entry
+        response = supabase.table("versions").insert({
+            "id": str(uuid.uuid4()),  # Generate a unique ID
+            "repo_id": req.repo_id,
+            "version": new_version,
+            "uid": req.uid,
+            "commit": req.commit
+        }).execute()
 
-    # Insert files for the new version
-    file_entries = [{"repo_id": req.repo_id, "version": new_version, "path": f["path"], "content": f["content"]} for f in req.files]
+        if not response.data:
+            raise HTTPException(status_code=500, detail="Failed to create version")
 
-    if file_entries:
-        supabase.table("files").insert(file_entries).execute()
+        # Insert files for the new version
+        file_entries = [{"repo_id": req.repo_id, "version": new_version, "path": file.path, "content": file.content} for file in req.files]
 
-    return {"error": False}
+        if file_entries:
+            supabase.table("files").insert(file_entries).execute()
+
+        return {"error": False}
+    except Exception as e:
+        logger.error(f"Error processing request: {e}")
+        raise HTTPException(status_code=400, detail="Bad Request")
 
 @router.post("/get-version", response_model=GetVersionResponseModel)
 async def get_version(req: GetVersionModel):
