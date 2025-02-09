@@ -3,10 +3,12 @@ import Navbar from "../navbar";
 import React, { useState } from "react";
 import registerAction from "@/actions/register";
 import { useRouter } from "next/navigation";
+
 const Page = () => {
   const router = useRouter();
   let [formData, setFormData] = useState({});
   let [error, setError] = useState(false);
+
   const handleRegister = async (e) => {
     e.preventDefault();
     try {

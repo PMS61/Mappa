@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 @router.post("/create-room", response_model=RoomResponseModel)
 async def create_room(req: RoomRequestModel):
-    print("hello")
-    # logger.info(f"Received request: {req}")
+    logger.info(f"Received request: {req}")
     response = supabase.table("room").insert({
         "room_id": req.room_id,
         "repo_id": req.repo_id,
@@ -24,14 +23,14 @@ async def create_room(req: RoomRequestModel):
     }).execute()
     
     # Log the full response for debugging
-    # logger.info(f"Supabase response: {response}")
+    logger.info(f"Supabase response: {response}")
 
     if not response.data:
-        logger.error(f"Failed to create room: {response.error.message}")
-        raise HTTPException(status_code=500, detail=f"Failed to create room: {response.error.message}")
+        error_message = response.error.message if response.error else "Unknown error"
+        logger.error(f"Failed to create room: {error_message}")
+        raise HTTPException(status_code=500, detail=f"Failed to create room: {error_message}")
     
-    # Uncomment this line to log successful creation
-    # logger.info(f"Room created successfully with ID {req.room_id}")
+    logger.info(f"Room created successfully with ID {req.room_id}")
     
     return {"error": False, "message": "Room created successfully"}
 
@@ -39,8 +38,9 @@ async def create_room(req: RoomRequestModel):
 async def get_room_and_path(req: RoomAndPathRequestModel):
     response = supabase.table("room").select("*").eq("repo_id", req.repo_id).execute()
     if not response.data:
-        logger.error(f"Failed to get room and path: {response.error.message}")
-        raise HTTPException(status_code=500, detail=f"Failed to get room and path: {response.error.message}")
+        error_message = response.error.message if response.error else "Unknown error"
+        logger.error(f"Failed to get room and path: {error_message}")
+        raise HTTPException(status_code=500, detail=f"Failed to get room and path: {error_message}")
     
     rooms = [{"room_id": room["room_id"], "path": room["path"]} for room in response.data]
     return {"error": False, "message": "Rooms and paths retrieved successfully", "rooms": rooms}
@@ -54,7 +54,8 @@ async def create_new_file(req: NewFileRequestModel):
         "path": req.path,
     }).execute()
     if not response.data:
-        logger.error(f"Failed to create new file: {response.error.message}")
-        raise HTTPException(status_code=500, detail=f"Failed to create new file: {response.error.message}")
+        error_message = response.error.message if response.error else "Unknown error"
+        logger.error(f"Failed to create new file: {error_message}")
+        raise HTTPException(status_code=500, detail=f"Failed to create new file: {error_message}")
     
     return {"error": False, "message": "New file created successfully", "room_id": room_id}

@@ -1,5 +1,6 @@
-"use server"
-import { cookies } from 'next/headers'
+"use server";
+import { cookies } from 'next/headers';
+
 export default async function loginAction(formData) {
   try {
     let res = await fetch("http://localhost:8000/auth/login", {
@@ -8,20 +9,15 @@ export default async function loginAction(formData) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(formData),
-    })
+    });
     let data = await res.json();
     if (!data.error) {
-      cookies().set('token', data.token)
-      cookies().set('username', data.username)
-      // Store username in local storage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('uname', data.username);
-      }
-      return { success: true, username: data.username } // Return username in the response
+      cookies().set('token', data.token);
+      cookies().set('username', data.username);
+      return { success: true, username: data.username }; // Return username in the response
     }
-    return { success: false }
-  }
-  catch (e) {
-    console.error({ message: e.message })
+    return { success: false };
+  } catch (e) {
+    console.error({ message: e.message });
   }
 }

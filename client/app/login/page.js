@@ -3,30 +3,26 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import loginAction from "@/actions/login";
 import Navbar from "../navbar";
+
 const Page = () => {
   const router = useRouter();
   let [formData, setFormData] = useState({});
   let [error, setError] = useState(false);
+
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       let response = await loginAction(formData);
-      if (response.success) router.push("/dashboard");
-      else setError(response.success);
+      if (response.success) {
+        router.push("/dashboard");
+      } else {
+        setError(response.success);
+      }
     } catch (e) {
       console.log(e);
-      let response = await loginAction(formData)
-      if (response.success) {
-        // Store username in local storage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('uname', response.username); // Use response.username instead of formData.username
-        }
-        router.push("/dashboard")
-      } else {
-        setError(response.success)
-      }
     }
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 p-6 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e]">
       <Navbar />
