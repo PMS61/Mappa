@@ -38,16 +38,18 @@ async def post_version(req: PostVersionModel):
 
     return {"error": False}
 
-@router.get("/get-version", response_model=GetVersionResponseModel)
+@router.post("/get-version", response_model=GetVersionResponseModel)
 async def get_version(req: GetVersionModel):
+    print(req.repo_id)
     response = supabase.table("versions").select("version", "uid", "commit").eq("repo_id", req.repo_id).order("version").execute()
 
+    print(response.data)
     if not response.data:
         return {"error": True, "versions": []}
 
     return {"error": False, "versions": response.data}
 
-@router.get("/read-version", response_model=ReadVersionResponseModel)
+@router.post("/read-version", response_model=ReadVersionResponseModel)
 async def read_version(req: ReadVersionModel):
     response = supabase.table("files").select("path", "content").eq("repo_id", req.repo_id).eq("version", req.version).execute()
 

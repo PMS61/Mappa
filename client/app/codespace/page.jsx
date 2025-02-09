@@ -12,23 +12,16 @@ const ResizeHandle = () => {
 };
 
 const Codespace = () => {
-  const [room, setRoom] = useState('default-room'); 
-  const [repoName, setRepoName] = useState('default-repo');
+  const [room, setRoom] = useState("default-room");
+  const [repoName, setRepoName] = useState("default-repo");
 
-  const [fileroom, setFileRoom] = useState('default-room');
-
-  const [room_and_file_array, setRoomAndFileArray] = useState([
-    { id: "hello", name: "index.js" },
-    { id: "2", name: "styles.css" },
-  ]);
-  const [active_state, setActiveState] = useState("hello");
-
+  const [fileroom, setFileRoom] = useState("default-room");
   useEffect(() => {
-    const repo_id = Cookies.get('repo_id');
-    const repo_name = Cookies.get('repo_name');
-    console.log('repo_id', repo_id);
-    console.log('repo_name', repo_name);
-    
+    const repo_id = Cookies.get("repo_id");
+    const repo_name = Cookies.get("repo_name");
+    console.log("repo_id", repo_id);
+    console.log("repo_name", repo_name);
+
     if (repo_id && repo_name) {
       setRoom(repo_id);
       setRepoName(repo_name);
@@ -38,17 +31,12 @@ const Codespace = () => {
   return (
     <PanelGroup direction="horizontal" className="relative">
       <Panel defaultSize={15} minSize={10}>
-        <FileTree 
-          room={room}
-          repoName={repoName}
-        />
+        <FileTree room={room} repoName={repoName} />
       </Panel>
       <ResizeHandle />
 
       <Panel defaultSize={60} minSize={30}>
-        <Editor 
-          room={fileroom}
-        />
+        <Editor room={fileroom} />
       </Panel>
 
       <ResizeHandle />

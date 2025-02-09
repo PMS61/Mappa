@@ -1,20 +1,26 @@
 "use client";
 
 import React, { useState } from "react";
-
+import getVersionAction from "@/actions/getVersions";
 const VersionPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReadOnlyModalOpen, setIsReadOnlyModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const toggleModal = () => {
+  const toggleModal = async (e) => {
+    e.preventDefault();
     setIsModalOpen(!isModalOpen);
+    const { success, versions } = await getVersionAction();
+    setInpData(versions);
+    if (!success) {
+      return <div>Error: {success}</div>;
+    }
   };
 
   const toggleReadOnlyModal = () => {
     setIsReadOnlyModalOpen(!isReadOnlyModalOpen);
   };
-
+  const [inpData, setInpData] = useState([]);
   const dummyData = [
     { version: "1.0.0", description: "Initial release", username: "admin" },
     {
@@ -58,7 +64,7 @@ const VersionPage = () => {
                     Version
                   </th>
                   <th className="py-2 px-4 bg-yellow-600 text-white dark:bg-blue-500">
-                    Description
+                    Commit
                   </th>
                   <th className="py-2 px-4 bg-yellow-600 text-white dark:bg-blue-500">
                     Username
@@ -66,20 +72,20 @@ const VersionPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {dummyData.map((row, index) => (
+                {inpData.map((row, index) => (
                   <tr
                     key={index}
                     className={`border-b dark:border-gray-700 cursor-pointer ${selectedRow === index ? "bg-yellow-200 dark:bg-gray-700" : ""}`}
                     onClick={() => handleRowClick(index)}
                   >
                     <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                      {row.version}
+                      {row?.version}
                     </td>
                     <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                      {row.description}
+                      {row?.commit}
                     </td>
                     <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                      {row.username}
+                      {row?.uid}
                     </td>
                   </tr>
                 ))}
