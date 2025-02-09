@@ -38,6 +38,7 @@ export function CollaborativeEditor() {
     const ytext = ydoc.getText("codemirror").toString(); // Get the content from Yjs document
     console.log("Ytext:", ytext); // Log Yjs content for debugging
 
+    
     const commitData = {
       repo_id: repoId,
       uid: uid,
