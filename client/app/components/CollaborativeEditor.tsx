@@ -5,31 +5,73 @@ import { yCollab } from "y-codemirror.next";
 import { EditorView, basicSetup } from "codemirror";
 import { EditorState } from "@codemirror/state";
 import { javascript } from "@codemirror/lang-javascript";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { LiveblocksYjsProvider } from "@liveblocks/yjs";
 import { useRoom, useSelf } from "@liveblocks/react/suspense";
 import styles from "./CollaborativeEditor.module.css";
 import { Avatars } from "./Avatars";
 import { EditorTabs } from "./EditorTabs";
 import { CommitModal } from "./CommitModal";
+import { createNewRoom } from "../editor/Room";
+import Cookies from "js-cookie";
 
 // Collaborative code editor with file tabs, live cursors, and live avatars
-export function CollaborativeEditor() {
+export function CollaborativeEditor({tabs, setTabs, activeTab, setActiveTab}) {
   const room = useRoom();
   const [element, setElement] = useState<HTMLElement>();
-  const [tabs, setTabs] = useState([
-    { id: "1", name: "index.js" },
-    { id: "2", name: "styles.css" },
-  ]);
-  const [activeTab, setActiveTab] = useState("1");
+  // const [tabs, setTabs] = useState([
+  //   { id: "1", name: "index.js" },
+  //   { id: "2", name: "styles.css" },
+  // ]);
+  // const [activeTab, setActiveTab] = useState("1");
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
+  const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
 
   // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
-  const handleCommit = (message: string) => {
-    // Implement your commit logic here
-    console.log("Committing with message:", message);
+  const ydoc = useRef(new Y.Doc()).current; // Use useRef to ensure a single instance
+
+  const handleCommit = async (message: string) => {
+    const uid = localStorage.getItem("uname");
+    const repoId = Cookies.get("repo_id"); // Get repo_id from cookies
+    const ytext = ydoc.getText("codemirror").toString(); // Get the content from Yjs document
+    console.log("Ytext:", ytext); // Log Yjs content for debugging
+
+    
+    const commitData = {
+      repo_id: repoId,
+      uid: uid,
+      commit: message,
+      files: [
+        {
+          path: "mappa/main.py",
+          content: ytext,
+        },
+      ],
+    };
+
+    console.log("Commit Data:", commitData); // Log commit data for debugging
+
+    try {
+      const res = await fetch("http://localhost:8000/version/post-version", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(commitData),
+      });
+
+      if (res.status === 200) {
+        console.log("Commit successful");
+      } else {
+        console.error("Commit failed");
+      }
+    } catch (e) {
+      console.error("Error committing changes:", e);
+    }
   };
+
   const ref = useCallback((node: HTMLElement | null) => {
     if (!node) return;
     setElement(node);
@@ -88,10 +130,24 @@ export function CollaborativeEditor() {
     };
   }, [switchToNextTab, switchToPreviousTab]);
 
+  // Listen for the add-tab event and update the tabs state accordingly
+  useEffect(() => {
+    const handleAddTab = (event: CustomEvent) => {
+      const { id, name } = event.detail;
+      setTabs((prevTabs) => [...prevTabs, { id, name }]);
+      setActiveTab(id);
+    };
+
+    window.addEventListener("add-tab", handleAddTab);
+
+    return () => {
+      window.removeEventListener("add-tab", handleAddTab);
+    };
+  }, []);
+
   // Set up Liveblocks Yjs provider and attach CodeMirror editor
   useEffect(() => {
     let provider: LiveblocksYjsProvider;
-    let ydoc: Y.Doc;
     let view: EditorView;
 
     if (!element || !room || !userInfo) {
@@ -99,7 +155,6 @@ export function CollaborativeEditor() {
     }
 
     // Create Yjs provider and document
-    ydoc = new Y.Doc();
     provider = new LiveblocksYjsProvider(room as any, ydoc);
     const ytext = ydoc.getText("codemirror");
 
@@ -143,6 +198,18 @@ export function CollaborativeEditor() {
     };
   }, [element, room, userInfo]);
 
+  const handleCreateNewFile = async () => {
+    try {
+      const newRoomId = await createNewRoom(newFileName);
+      setTabs([...tabs, { id: newRoomId, name: newFileName }]);
+      setActiveTab(newRoomId);
+      setIsNewFileModalOpen(false);
+      setNewFileName("");
+    } catch (error) {
+      console.error("Failed to create new file:", error);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.editorHeader}>
@@ -154,23 +221,11 @@ export function CollaborativeEditor() {
             onTabClose={handleTabClose}
           />
           <button
-            className={styles.commitButton}
+            className="btn btn-outline btn-accent"
             onClick={() => setIsCommitModalOpen(true)}
             title="Commit changes"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
+            Commit
           </button>
         </div>
         <Avatars />
@@ -181,6 +236,21 @@ export function CollaborativeEditor() {
         onClose={() => setIsCommitModalOpen(false)}
         onCommit={handleCommit}
       />
+      {isNewFileModalOpen && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h2>Create New File</h2>
+            <input
+              type="text"
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              placeholder="Enter file name"
+            />
+            <button onClick={handleCreateNewFile}>Create</button>
+            <button onClick={() => setIsNewFileModalOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

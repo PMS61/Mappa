@@ -6,7 +6,7 @@ import Button from "./Button";
 import Cookies from "js-cookie";
 import createRepoAction from "@/actions/newRepo";
 import fetchReposAction from "@/actions/allRepos"; // Ensure correct import path
-
+import Navbar from "../navbar";
 const Page = () => {
   const [username, setUsername] = useState("");
   const [repositories, setRepositories] = useState([]);
@@ -54,7 +54,8 @@ const Page = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 p-6 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e]">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border-2 border-yellow-200 dark:bg-gray-800/90 dark:border-gray-700">
+        <Navbar />
+        <div className="mt-8 bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border-2 border-yellow-200 dark:bg-gray-800/90 dark:border-gray-700">
           {/* Header section */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-12">
             <div>
@@ -74,7 +75,7 @@ const Page = () => {
           </div>
 
           {/* Repositories info cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {repositories.map((repo, index) => (
               <CardWithModal
                 key={index}

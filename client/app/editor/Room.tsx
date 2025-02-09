@@ -6,12 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { ClientSideSuspense } from "@liveblocks/react";
 import { Loading } from "../components/Loading";
 
-export function Room({ children }: { children: ReactNode }) {
-  const roomId = useExampleRoomId("liveblocks:examples:nextjs-yjs-codemirror");
+export function Room({ children, roomId }: { children: ReactNode, roomId: string }) {
+  console.log("Room", roomId);
+  const finalRoomId = useExampleRoomId(roomId);
 
   return (
     <RoomProvider
-      id={roomId}
+      id={finalRoomId}
       initialPresence={{
         cursor: null,
       }}
@@ -19,6 +20,23 @@ export function Room({ children }: { children: ReactNode }) {
       <ClientSideSuspense fallback={<Loading />}>{children}</ClientSideSuspense>
     </RoomProvider>
   );
+}
+
+export async function createNewRoom(fileName: string) {
+  const response = await fetch("/api/create-room", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fileName }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create new room");
+  }
+
+  const { roomId } = await response.json();
+  return roomId;
 }
 
 /**

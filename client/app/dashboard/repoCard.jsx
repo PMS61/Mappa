@@ -35,15 +35,7 @@ const CardWithModal = ({ index, icon, label, value, color }) => {
     }
   };
   return (
-    <div
-      className={`p-4 rounded-lg shadow-lg bg-gradient-to-br ${color}`}
-      onClick={() => {
-        Cookies.set("repo_id", value, { expires: 10 });
-        Cookies.set("repo_name", label, { expires: 10 });
-        router.push("/codespace");
-        console.log(value);
-      }}
-    >
+    <div className={`p-4 rounded-lg shadow-lg bg-gradient-to-br ${color}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-2xl">{icon}</span>
@@ -52,12 +44,23 @@ const CardWithModal = ({ index, icon, label, value, color }) => {
             <p className="text-[10px]">{value}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <button
             onClick={() => setShowAddCollabModal(true)}
-            className="btn bg-blue-100 text-blue-800 hover:bg-blue-200 px-2 py-1 rounded-full dark:bg-blue-700 dark:text-blue-200 dark:hover:bg-blue-600"
+            className="btn btn-warning"
           >
-            Add Collaborator
+            Add Collab
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              Cookies.set("repo_id", value, { expires: 10 });
+              Cookies.set("repo_name", label, { expires: 10 });
+              router.push("/codespace");
+              console.log(value);
+            }}
+          >
+            CodeSpace
           </button>
         </div>
       </div>

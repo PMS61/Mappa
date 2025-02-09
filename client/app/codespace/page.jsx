@@ -1,33 +1,32 @@
-"use client"
-import Cookies from 'js-cookie'
-import React, { useEffect, useState } from 'react'
-import FileTree from '../fileTree/page'
-import Chat from '../chat/page'
-import Editor from '../editor/page'
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
+"use client";
+import Cookies from "js-cookie";
+import VersionPage from "../components/viewVersion";
+import React, { useEffect, useState } from "react";
+import FileTree from "../fileTree/page";
+import Chat from "../chat/page";
+import Editor from "../editor/page";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 const ResizeHandle = () => {
   return <PanelResizeHandle className="panel-resize-handle" />;
 };
 
 const Codespace = () => {
-  const [room, setRoom] = useState('default-room'); 
-  const [repoName, setRepoName] = useState('default-repo');
+  const [room, setRoom] = useState("default-room");
+  const [repoName, setRepoName] = useState("default-repo");
 
-  const [fileroom, setFileRoom] = useState('default-room');
-
-  const [room_and_file_array, setRoomAndFileArray] = useState([
+  const [tabs, setTabs] = useState([
     { id: "hello", name: "index.js" },
     { id: "2", name: "styles.css" },
   ]);
   const [active_state, setActiveState] = useState("hello");
 
   useEffect(() => {
-    const repo_id = Cookies.get('repo_id');
-    const repo_name = Cookies.get('repo_name');
-    console.log('repo_id', repo_id);
-    console.log('repo_name', repo_name);
-    
+    const repo_id = Cookies.get("repo_id");
+    const repo_name = Cookies.get("repo_name");
+    console.log("repo_id", repo_id);
+    console.log("repo_name", repo_name);
+
     if (repo_id && repo_name) {
       setRoom(repo_id);
       setRepoName(repo_name);
@@ -35,29 +34,32 @@ const Codespace = () => {
   }, []);
 
   return (
-    <PanelGroup direction="horizontal">
+    <PanelGroup direction="horizontal" className="relative">
       <Panel defaultSize={15} minSize={10}>
-        <FileTree 
-          room={room}
-          repoName={repoName}
-        />
+        <FileTree room={room} repoName={repoName} />
       </Panel>
-      
       <ResizeHandle />
-      
+
       <Panel defaultSize={60} minSize={30}>
         <Editor 
-          room={fileroom}
+          tabs={tabs}
+          setTabs={setTabs}
+          activeTab={active_state}
+          setActiveTab={setActiveState}
         />
       </Panel>
-      
+
       <ResizeHandle />
-      
+
       <Panel defaultSize={25} minSize={15}>
         <Chat />
       </Panel>
+      <button className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-blue-600 absolute left-6 bottom-20">
+        Merge Conflicts
+      </button>
+      <VersionPage />
     </PanelGroup>
   );
-}
+};
 
-export default Codespace
+export default Codespace;
