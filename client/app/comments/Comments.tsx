@@ -3,7 +3,6 @@
 import { Thread, Composer } from "@liveblocks/react-ui";
 import { useThreads } from "@/app/liveblocks.config.ts";
 import { formatDistanceToNow } from "date-fns";
-import { UserAvatar } from "./user-avatar"; // Assume you have a user avatar component
 import "@liveblocks/react-ui/styles.css";
 
 export default function Comments() {
@@ -38,23 +37,7 @@ export default function Comments() {
         {threads?.map((thread) => (
           <div key={thread.id} className="bg-gray-50 rounded-xl p-4 shadow-sm border border-gray-200">
             {/* Thread Header */}
-            <div className="flex items-center gap-3 mb-3">
-              <UserAvatar 
-                name={thread.author?.name || "Anonymous"} 
-                className="h-8 w-8"
-              />
-              <div>
-                <p className="text-sm font-semibold text-gray-900">
-                  {thread.author?.name || "Anonymous"}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {thread.createdAt 
-                    ? formatDistanceToNow(new Date(thread.createdAt.toString()), { 
-                        addSuffix: true 
-                      }) 
-                    : "Just now"}
-                </p>
-              </div>
+            
             </div>
 
             {/* Thread Content */}
