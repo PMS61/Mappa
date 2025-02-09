@@ -168,6 +168,7 @@ export default function FileTree({ paths, room, repoName, addfile }) {
     const [localPaths, setLocalPaths] = useState(paths);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPath, setCurrentPath] = useState('');
+    
 
     useEffect(() => {
         console.log(paths, repoName, room);
@@ -225,6 +226,7 @@ export default function FileTree({ paths, room, repoName, addfile }) {
     const handleFileClick = (roomId) => {
         const file = localPaths.find(path => path.room_id === roomId);
         if (file) {
+            document.cookie = `file_${roomId}=${encodeURIComponent(file.path)}; path=/; max-age=31536000`;
             const filename = file.path.split('/').pop();
             addfile({ id: roomId, name: filename });
         }
