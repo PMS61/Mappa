@@ -9,7 +9,7 @@ export default function CommentsPage() {
     const username = Cookies.get("username");
   return (
     <LiveblocksUIConfig
-    overrides={{ locale: "fr", USER_UNKNOWN: username?username:"Anonymous" /* ... */ }}
+    overrides={{ locale: "en", USER_UNKNOWN: username?username:"Anonymous" /* ... */ }}
   >
     <RoomProvider
       id="liveblocks:examples:nextjs-yjs-codemirror

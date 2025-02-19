@@ -1,7 +1,7 @@
 "use client";
 
 import { Thread, Composer } from "@liveblocks/react-ui";
-import { useThreads } from "@/app/liveblocks.config.ts";
+import { useThreads } from "@/app/liveblocks.config";
 import { formatDistanceToNow } from "date-fns";
 import "@liveblocks/react-ui/styles.css";
 
