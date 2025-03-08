@@ -7,7 +7,8 @@ import Cookies from "js-cookie";
 import React, { useState } from 'react';
 import Chatbot from '../chatbot/page';
 
-export default function CommentsPage() {
+export default function CommentsPage({ roomId="global" }) {
+  console.log("chat room id:", roomId)
   const username = Cookies.get("username");
   const [isChatbot, setIsChatbot] = useState(false);
 
@@ -16,7 +17,7 @@ export default function CommentsPage() {
       overrides={{ locale: "en", USER_UNKNOWN: username ? username : "Anonymous" /* ... */ }}
     >
       <RoomProvider
-        id="liveblocks:examples:nextjs-yjs-codemirror" // Replace with your actual room ID
+        id={roomId}
         initialPresence={{}} // Add any initial presence data if needed
         initialStorage={{}} // Add any initial storage data if needed
       >

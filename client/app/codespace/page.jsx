@@ -7,7 +7,7 @@ import Chat from "../chat/page";
 import Editor from "../editor/page";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import CommentsPage from "../comments/page";
-import Home from "../drawing-board/page";
+// import Home from "../drawing-board/page";
 
 const ResizeHandle = () => {
   return <PanelResizeHandle className="panel-resize-handle" />;
@@ -59,7 +59,9 @@ const Codespace = () => {
       <ResizeHandle />
 
       <Panel defaultSize={25} minSize={15}>
-        <CommentsPage/>
+        <CommentsPage
+          roomId={room}
+        />
       </Panel>
       <button className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-blue-600 absolute left-6 bottom-20">
         Merge Conflicts
