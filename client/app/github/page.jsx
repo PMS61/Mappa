@@ -3,8 +3,11 @@ import { useState, useEffect } from "react";
 import { Octokit } from "@octokit/rest";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import dotenv from "dotenv";
 
-const GITHUB_TOKEN = "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"; // Replace
+dotenv.config();
+
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OWNER = "Ghruank"; // Replace with your GitHub username
 const REPO = "github_api";
 const FILE_PATH = "main.py"; // Fixed file name

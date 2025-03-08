@@ -15,7 +15,11 @@ import { CommitModal } from "./CommitModal";
 import { createNewRoom } from "../editor/Room";
 import Cookies from "js-cookie";
 import dynamic from "next/dynamic";
+import { Octokit } from "@octokit/rest";
 const MergeEditor = dynamic(() => import("../merge-editor/page"), { ssr: false });
+
+const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || "";
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 // Collaborative code editor with file tabs, live cursors, and live avatars
 export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) {
@@ -92,6 +96,62 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
       console.error("Error committing changes:", e);
     }
   };
+
+  async function handlePushToGithub() {
+    const message = prompt("Enter commit message:");
+    if (!message) return;
+
+    const contentToPush = Cookies.get("beta") || "";
+    const owner = "Ghruank";
+    const repo = "github_api";
+    const filePath = Cookies.get(`file_${activeTab}`); // Get the file path from cookies
+    const branch = "main";
+
+    try {
+      // Fetch the existing file to get the SHA
+      const { data } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path: filePath,
+        ref: branch,
+      });
+
+      const sha = Array.isArray(data) ? data[0].sha : data.sha; // Get the existing file's SHA
+
+      // Now push the update with the required SHA
+      await octokit.repos.createOrUpdateFileContents({
+        owner,
+        repo,
+        path: filePath,
+        message,
+        content: btoa(contentToPush),
+        branch,
+        sha, // Include SHA to update existing file
+      });
+
+      alert("File pushed successfully!");
+    } catch (error: any) {
+      if (error.status === 404) {
+        // If the file doesn't exist, create a new one without SHA
+        try {
+          await octokit.repos.createOrUpdateFileContents({
+            owner,
+            repo,
+            path: filePath,
+            message,
+            content: btoa(contentToPush),
+            branch,
+          });
+
+          alert("File created successfully!");
+        } catch (createError) {
+          console.error("Error creating file:", createError);
+        }
+      } else {
+        console.error("Error pushing file:", error);
+      }
+    }
+  }
 
   const ref = useCallback((node: HTMLElement | null) => {
     if (!node) return;
@@ -262,6 +322,13 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
             title="Commit changes"
           >
             Commit
+          </button>
+          <button
+            className="btn btn-outline"
+            onClick={handlePushToGithub}
+            title="Push to GitHub"
+          >
+            Push to GitHub
           </button>
         </div>
         <Avatars />

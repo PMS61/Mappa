@@ -7,6 +7,7 @@ import Chat from "../chat/page";
 import Editor from "../editor/page";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import CommentsPage from "../comments/page";
+import Home from "../drawing-board/page";
 
 const ResizeHandle = () => {
   return <PanelResizeHandle className="panel-resize-handle" />;
