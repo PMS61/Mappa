@@ -4,6 +4,7 @@ import { Thread, Composer } from "@liveblocks/react-ui";
 import { useThreads } from "@/app/liveblocks.config";
 import { formatDistanceToNow } from "date-fns";
 import "@liveblocks/react-ui/styles.css";
+import { LiveblocksUIConfig } from "@liveblocks/react-ui";
 
 export default function Comments() {
   const { threads } = useThreads();
@@ -40,6 +41,9 @@ export default function Comments() {
            
 
             {/* Thread Content */}
+            <LiveblocksUIConfig
+      overrides={{ locale: "en", USER_UNKNOWN: thread.comments[0].userId ? thread.comments[0].userId : "Anonymous" /* ... */ }}
+    >
             <Thread 
               thread={thread}
               className="space-y-4"
@@ -50,6 +54,7 @@ export default function Comments() {
               composerInputClassName="w-full bg-gray-50 rounded-lg p-2 text-sm border border-gray-200 focus:outline-none focus:border-blue-500"
               composerSubmitClassName="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
             />
+            </LiveblocksUIConfig>
           </div>
         ))}
       </div>
