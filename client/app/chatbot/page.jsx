@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { FaPaperPlane, FaRedo } from 'react-icons/fa'; // Import icons
+import ReactMarkdown from 'react-markdown' // Import ReactMarkdown
 
 const Chatbot = () => {
   const [alphaContext, setAlphaContext] = useState("")
@@ -49,7 +50,7 @@ const Chatbot = () => {
         setConversation([
           ...conversation,
           { sender: "User", message: decodedInput },
-          { sender: "Bot", message: data.response }
+          { sender: "MappaAI", message: data.response }
         ])
         setInput("")
       } else {
@@ -61,7 +62,7 @@ const Chatbot = () => {
   }
 
   const renderMessage = (msg, index) => {
-    if (msg.sender === "Bot" && msg.message.startsWith("```") && msg.message.endsWith("```")) {
+    if (msg.sender === "MappaAI" && msg.message.startsWith("```") && msg.message.endsWith("```")) {
       const codeSnippet = msg.message.slice(3, -3)
       return (
         <pre key={index} className="p-2 rounded bg-green-200">
@@ -71,7 +72,7 @@ const Chatbot = () => {
     }
     return (
       <div key={index} className={`p-2 rounded ${msg.sender === "User" ? "bg-blue-200" : "bg-green-200"}`}>
-        <strong>{msg.sender}:</strong> {msg.message}
+        <strong>{msg.sender}:</strong> <ReactMarkdown>{msg.message}</ReactMarkdown>
       </div>
     )
   }
