@@ -14,18 +14,16 @@ import {
   import '@stream-io/video-react-sdk/dist/css/styles.css';
   import './style.css';
   
-  const apiKey = 'mmhfdzb5evj2';
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL01pc3Npb25fVmFvIiwidXNlcl9pZCI6Ik1pc3Npb25fVmFvIiwidmFsaWRpdHlfaW5fc2Vjb25kcyI6NjA0ODAwLCJpYXQiOjE3NDEzNzQ0NjAsImV4cCI6MTc0MTk3OTI2MH0.Yj3bkzUvMq4Fk25dwxSkpw_EZ1ZI2Qxlv9qCQ1mDKLQ';
-  const userId = 'Mission_Vao';
-  const callId = 'u62dw9SPqMq3';
+  const apiKey = 'gdywtu7uj286';
+  const callId = 'default_6c43dfc9-5938-46f0-a7c8-fe2ad7e39c84';
   
   const user: User = {
-    id: userId,
-    name: 'Oliver',
-    image: 'https://getstream.io/random_svg/?id=oliver&name=Oliver',
+    name: "Prathamesh",
+    id: "jack-guest",
+    type: "guest",
   };
   
-  const client = new StreamVideoClient({ apiKey, user, token });
+  const client = new StreamVideoClient({ apiKey, user });
   const call = client.call('default', callId);
   call.join({ create: true });
   
