@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import FileTree from '../fileTree/fileTree'
 
 const Page = ({ room, repoName, tabs, setTabs, setActiveTab }) => {
-
   // const pathss=["F1/F2/f3", "F1/f8", "F3/F4/f5", "F3/F4/f6", "F3/F7/f8", "F9/f10", "F11/F12/f13", "F11/F12/f14", "F11/F15/f16", "F11/F15/f17"];
 
   const [paths, setPaths] = useState([]);
@@ -35,16 +34,16 @@ const Page = ({ room, repoName, tabs, setTabs, setActiveTab }) => {
     setActiveTab(entry.id);
   }
   
-  useEffect(
-    () => {
-      getPaths();
+  useEffect(() => {
+    getPaths();
+    const intervalId = setInterval(getPaths, 2000); // Auto-refresh every 2 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, [room]); // Added room as a dependency to re-fetch paths when room changes
 
   useEffect(() => {
     console.log(paths);
   }, [paths]);
-
-
 
   console.log(paths, room, repoName);
 
