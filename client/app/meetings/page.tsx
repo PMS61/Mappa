@@ -13,12 +13,15 @@ import {
   
   import '@stream-io/video-react-sdk/dist/css/styles.css';
   import './style.css';
+import Cookies from 'js-cookie';
   
   const apiKey = 'gdywtu7uj286';
   const callId = 'default_6c43dfc9-5938-46f0-a7c8-fe2ad7e39c84';
   
+  const username = Cookies.get('username') || 'default-username';
+
   const user: User = {
-    name: "Prathamesh",
+    name: username,
     id: "jack-guest",
     type: "guest",
   };
