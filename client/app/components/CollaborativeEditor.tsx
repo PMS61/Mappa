@@ -103,15 +103,33 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
 
     const contentToPush = Cookies.get("beta") || "";
     const owner = "Ghruank";
-    const repo = "github_api";
-    const filePath = Cookies.get(`file_${activeTab}`); // Get the file path from cookies
+    const repoName = Cookies.get("repo_name"); // Get the repo name from cookies
+    const filePathWithRepo = Cookies.get(`file_${activeTab}`); // Get the file path from cookies
+    const filePath = filePathWithRepo.split('/').slice(1).join('/'); // Remove repo name from the path
     const branch = "main";
 
     try {
+      // Create a new repository if it doesn't exist
+      try {
+        await octokit.repos.get({
+          owner,
+          repo: repoName,
+        });
+      } catch (error: any) {
+        if (error.status === 404) {
+          await octokit.repos.createForAuthenticatedUser({
+            name: repoName,
+          });
+          alert("Repository created successfully!");
+        } else {
+          throw error;
+        }
+      }
+
       // Fetch the existing file to get the SHA
       const { data } = await octokit.repos.getContent({
         owner,
-        repo,
+        repo: repoName,
         path: filePath,
         ref: branch,
       });
@@ -121,7 +139,7 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
       // Now push the update with the required SHA
       await octokit.repos.createOrUpdateFileContents({
         owner,
-        repo,
+        repo: repoName,
         path: filePath,
         message,
         content: btoa(contentToPush),
@@ -136,7 +154,7 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
         try {
           await octokit.repos.createOrUpdateFileContents({
             owner,
-            repo,
+            repo: repoName,
             path: filePath,
             message,
             content: btoa(contentToPush),
