@@ -13,7 +13,7 @@ export function Badge({
       target="_blank"
       {...props}
     >
-      <picture>
+      {/* <picture>
         <source
           srcSet="https://liveblocks.io/badge-dark.svg"
           media="(prefers-color-scheme: dark)"
@@ -23,7 +23,7 @@ export function Badge({
           alt="Made with Liveblocks"
           className={styles.image}
         />
-      </picture>
+      </picture> */}
     </a>
   );
 }

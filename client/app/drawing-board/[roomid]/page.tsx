@@ -1,7 +1,7 @@
 "use client";
 
-import { Room } from "./Room";
-import { YjsTldraw } from "./YjsTldraw";
+import { Room } from "../Room";
+import { YjsTldraw } from "../YjsTldraw";
 
 /**
  * IMPORTANT: LICENSE REQUIRED
@@ -9,9 +9,13 @@ import { YjsTldraw } from "./YjsTldraw";
  * Learn more: https://tldraw.dev/community/license
  */
 
-export default function Home() {
+export default function Home({
+  params,
+}: {
+  params: { roomid: string };
+}) {
   return (
-    <Room>
+    <Room roomid={params.roomid}>
       <YjsTldraw />
     </Room>
   );

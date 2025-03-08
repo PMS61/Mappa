@@ -6,6 +6,8 @@ import CreateFileModal from "./CreateFileModal";
 import { createFolder } from "./folderUtils";
 import { useRouter } from "next/navigation";
 
+import Link from "next/link";
+
 const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContextMenu }) => {
     if (name == ".hidden") return null;
     return (
@@ -176,6 +178,8 @@ export default function FileTree({ paths, room, repoName, addfile }) {
     const [localPaths, setLocalPaths] = useState(paths);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPath, setCurrentPath] = useState('');
+
+    // const router = useRouter();
     
 
     useEffect(() => {
@@ -218,6 +222,7 @@ export default function FileTree({ paths, room, repoName, addfile }) {
         setLocalPaths(updatedPaths);
 
         // Add the new file to the tabs in the CollaborativeEditor
+        if (fileName.slice(-3) !== "dwg")
         window.dispatchEvent(new CustomEvent('add-tab', { detail: { id: roomId, name: fileName } }));
     };
 
@@ -236,7 +241,14 @@ export default function FileTree({ paths, room, repoName, addfile }) {
         if (file) {
             document.cookie = `file_${roomId}=${encodeURIComponent(file.path)}; path=/; max-age=31536000`;
             const filename = file.path.split('/').pop();
-            addfile({ id: roomId, name: filename });
+            if (filename.slice(-3) == "dwg"){
+                window.open(`/drawing-board/${roomId}`, "_blank", "noopener,noreferrer");
+                // router.push(`/drawing-board/${roomId}`)
+                // console.log(`/drawing-board/${roomId}`)
+            }
+            else{
+                addfile({ id: roomId, name: filename });
+            }
         }
     };
 

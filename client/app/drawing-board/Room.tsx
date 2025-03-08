@@ -6,14 +6,15 @@ import { ReactNode, useMemo } from "react";
 import { LiveMap } from "@liveblocks/core";
 import { Loading } from "./Loading";
 
-export function Room({ children }: { children: ReactNode }) {
-  const roomId = useExampleRoomId(
-    "liveblocks:examples:nextjs-tldraw-whiteboard-yjs"
-  );
+export function Room({ children, roomid }: { children: ReactNode, roomid: string }) {
+  // const finalRoomId = useExampleRoomId(
+  //   "liveblocks:examples:nextjs-tldraw-whiteboard-yjs"
+  // );
+  const finalRoomId = useExampleRoomId(roomid)
 
   return (
     <RoomProvider
-      id={roomId}
+      id={finalRoomId}
       initialPresence={{ presence: undefined }}
       initialStorage={{ records: new LiveMap() }}
     >
