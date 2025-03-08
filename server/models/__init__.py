@@ -5,3 +5,4 @@ from .repoModel import RepoRequestModel,RepoResponseModel,FileRequestModel,FileR
 from .roomModel import RoomRequestModel,RoomResponseModel, RoomAndPathRequestModel, RoomAndPathResponseModel, NewFileRequestModel, NewFileResponseModel
 from .accessModel import AccessRequestModel,AccessResponseModel
 from .versionModel import PostVersionModel,GetVersionModel, GetVersionResponseModel, ReadVersionModel, ReadVersionResponseModel
+from .chatModel import ChatRequestModel, ChatResponseModel

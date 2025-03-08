@@ -1,0 +1,105 @@
+"use client"
+
+import React, { useState, useEffect } from 'react'
+
+const Chatbot = () => {
+  const [alphaContext, setAlphaContext] = useState("")
+  const [conversation, setConversation] = useState([])
+  const [input, setInput] = useState("")
+
+  useEffect(() => {
+    const betaMatch = document.cookie.match(/(^|;\s*)beta=([^;]+)/)
+    if (betaMatch) {
+      setAlphaContext(decodeURIComponent(betaMatch[2]))
+    }
+  }, [])
+
+  const sendMessage = async () => {
+    try {
+      const decodedInput = decodeURIComponent(input)
+      console.log("Sending message:", decodedInput)
+      const response = await fetch("http://localhost:8000/api/chatbot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          alphaContext,
+          conversation: conversation.map(msg => ({
+            role: msg.sender === "User" ? "user" : "assistant",
+            content: msg.message
+          })),
+          newMessage: decodedInput
+        })
+      })
+      if (!response.ok) {
+        console.error("Non-200 response:", response.status)
+        return
+      }
+      let data
+      try {
+        data = await response.json()
+      } catch (err) {
+        console.error("Error parsing JSON:", err)
+        return
+      }
+      console.log("Received response:", data)
+      if (!data.error) {
+        setConversation([
+          ...conversation,
+          { sender: "User", message: decodedInput },
+          { sender: "Bot", message: data.response }
+        ])
+        setInput("")
+      } else {
+        console.error("Error from API:", data)
+      }
+    } catch (error) {
+      console.error("Error sending message:", error)
+    }
+  }
+
+  const renderMessage = (msg, index) => {
+    if (msg.sender === "Bot" && msg.message.startsWith("```") && msg.message.endsWith("```")) {
+      const codeSnippet = msg.message.slice(3, -3)
+      return (
+        <pre key={index} className="p-2 rounded bg-green-200">
+          <code>{codeSnippet}</code>
+        </pre>
+      )
+    }
+    return (
+      <div key={index} className={`p-2 rounded ${msg.sender === "User" ? "bg-blue-200" : "bg-green-200"}`}>
+        <strong>{msg.sender}:</strong> {msg.message}
+      </div>
+    )
+  }
+
+  const startNewChat = () => {
+    setConversation([])
+    setInput("")
+  }
+
+  return (
+    <div className="flex flex-col w-full h-full bg-gradient-to-r from-blue-100 to-green-100 backdrop-blur-md dark:from-gray-800 dark:via-gray-800 dark:to-gray-800">
+      <h2 className="text-xl font-bold text-center p-4 bg-gradient-to-r from-blue-600 to-green-800 bg-clip-text text-transparent dark:from-blue-500 dark:to-purple-500">
+        Chatbot
+      </h2>
+      <div className="flex-grow overflow-y-auto px-2 bg-blue-50 dark:bg-gray-700 flex flex-col space-y-4">
+        {conversation.map(renderMessage)}
+      </div>
+      <div className="p-2 flex">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-grow p-2 border rounded"
+        />
+        <button onClick={sendMessage} className="ml-2 p-2 bg-blue-500 text-white rounded">Send</button>
+        <button onClick={startNewChat} className="m-2 p-2 bg-red-500 text-white rounded">New Chat</button>
+      </div>
+    </div>
+  )
+}
+
+export default Chatbot
