@@ -4,10 +4,19 @@ import { Thread, Composer } from "@liveblocks/react-ui";
 import { useThreads } from "@/app/liveblocks.config";
 import { formatDistanceToNow } from "date-fns";
 import "@liveblocks/react-ui/styles.css";
+import { useEffect } from "react";
 import { LiveblocksUIConfig } from "@liveblocks/react-ui";
 
 export default function Comments() {
-  const { threads } = useThreads();
+  const { threads, refreshThreads } = useThreads();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshThreads();
+    }, 3000); // Refresh every 3 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [refreshThreads]);
 
   return (
     <div className="p-6 max-w-3xl mx-auto bg-white rounded-xl shadow-sm h-screen overflow-auto">

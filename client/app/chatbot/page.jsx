@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { FaPaperPlane, FaRedo } from 'react-icons/fa'; // Import icons
 import ReactMarkdown from 'react-markdown' // Import ReactMarkdown
+import Cookies from 'js-cookie'
 
 const Chatbot = () => {
   const [alphaContext, setAlphaContext] = useState("")
@@ -10,52 +11,61 @@ const Chatbot = () => {
   const [input, setInput] = useState("")
 
   useEffect(() => {
-    const betaMatch = document.cookie.match(/(^|;\s*)beta=([^;]+)/)
-    if (betaMatch) {
-      setAlphaContext(decodeURIComponent(betaMatch[2]))
-    }
+    // let betaMatch = Cookies.get("beta");
+    // setAlphaContext(betaMatch);
+    // if (betaMatch) {
+    //   setAlphaContext(decodeURIComponent(betaMatch[2]))
+    // }
   }, [])
-
+  let betaMatch
   const sendMessage = async () => {
     try {
-      const decodedInput = decodeURIComponent(input)
-      console.log("Sending message:", decodedInput)
-      const response = await fetch("http://localhost:8000/api/chatbot", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          alphaContext,
-          conversation: conversation.map(msg => ({
-            role: msg.sender === "User" ? "user" : "assistant",
-            content: msg.message
-          })),
-          newMessage: decodedInput
+      betaMatch = Cookies.get("beta");
+      setAlphaContext(betaMatch);
+      console.log(betaMatch);
+      setAlphaContext((prevAlphaContext) => {
+        console.log("Alpha context:", prevAlphaContext)
+        const decodedInput = decodeURIComponent(input)
+        console.log("Sending message:", decodedInput)
+        fetch("http://localhost:8000/api/chatbot", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            alphaContext: prevAlphaContext,
+            conversation: conversation.map(msg => ({
+              role: msg.sender === "User" ? "user" : "assistant",
+              content: msg.message
+            })),
+            newMessage: decodedInput
+          })
         })
+        .then(response => {
+          if (!response.ok) {
+            console.error("Non-200 response:", response.status)
+            return
+          }
+          return response.json()
+        })
+        .then(data => {
+          console.log("Received response:", data)
+          if (!data.error) {
+            setConversation([
+              ...conversation,
+              { sender: "User", message: decodedInput },
+              { sender: "MappaAI", message: data.response }
+            ])
+            setInput("")
+          } else {
+            console.error("Error from API:", data)
+          }
+        })
+        .catch(error => {
+          console.error("Error sending message:", error)
+        })
+        return prevAlphaContext
       })
-      if (!response.ok) {
-        console.error("Non-200 response:", response.status)
-        return
-      }
-      let data
-      try {
-        data = await response.json()
-      } catch (err) {
-        console.error("Error parsing JSON:", err)
-        return
-      }
-      console.log("Received response:", data)
-      if (!data.error) {
-        setConversation([
-          ...conversation,
-          { sender: "User", message: decodedInput },
-          { sender: "MappaAI", message: data.response }
-        ])
-        setInput("")
-      } else {
-        console.error("Error from API:", data)
-      }
     } catch (error) {
       console.error("Error sending message:", error)
     }
