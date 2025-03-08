@@ -51,6 +51,24 @@ const VersionPage = () => {
     }
   };
 
+  const handleRevert = async () => {
+    try {
+      const { success, data } = await readVersionAction(getVer);
+      if (success) {
+        window.dispatchEvent(
+          new CustomEvent("revert-version", {
+            detail: {
+              path: data?.path,
+              content: data?.content,
+            },
+          })
+        );
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <div className="absolute bottom-5 left-5">
       <button
@@ -109,7 +127,10 @@ const VersionPage = () => {
                 >
                   Read Only
                 </button>
-                <button className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600">
+                <button
+                  onClick={handleRevert}
+                  className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                >
                   Revert
                 </button>
               </div>

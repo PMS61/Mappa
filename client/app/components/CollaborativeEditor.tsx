@@ -232,6 +232,21 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
     };
   }, []);
 
+  useEffect(() => {
+    const handleRevertEvent = (event: any) => {
+      const { path, content } = event.detail;
+      // Optionally check if this path matches the active tab's file path cookies
+      const activeYDoc = getYDoc(activeTab);
+      activeYDoc.getText("codemirror").delete(0, activeYDoc.getText("codemirror").length);
+      activeYDoc.getText("codemirror").insert(0, content);
+    };
+
+    window.addEventListener("revert-version", handleRevertEvent);
+    return () => {
+      window.removeEventListener("revert-version", handleRevertEvent);
+    };
+  }, [activeTab, getYDoc]);
+
   // Set up Liveblocks Yjs provider and attach CodeMirror editor
   useEffect(() => {
     let provider: LiveblocksYjsProvider;
