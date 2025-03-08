@@ -5,6 +5,6 @@ from routes.roomRoute import router as room_router
 from routes.accessRoute import router as access_router
 from routes.addCollab import router as addCollab_router
 from routes.versionRoute import router as version_router
-
+from routes.scheduleRoute import router as schedule_router
 from routes.org import router as org
 from routes.chatRoute import router as chat_router

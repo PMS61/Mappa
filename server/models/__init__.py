@@ -6,5 +6,5 @@ from .roomModel import RoomRequestModel,RoomResponseModel, RoomAndPathRequestMod
 from .accessModel import AccessRequestModel,AccessResponseModel
 from .versionModel import PostVersionModel,GetVersionModel, GetVersionResponseModel, ReadVersionModel, ReadVersionResponseModel
 from .orgModel import OrgReq,OrgRes,OrgByUIDRequest,OrgInfo,OrgByUIDResponse
-
+from .scheduleModel import ScheduleRequestModel, ScheduleResponseModel
 from .chatModel import ChatRequestModel, ChatResponseModel
