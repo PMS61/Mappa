@@ -1,9 +1,10 @@
 from pydantic import BaseModel
-import uuid
+from uuid import UUID
 
 class RepoRequestModel(BaseModel):
     uid: str
     repo_name: str
+    org_id: UUID
 
 class RepoResponseModel(BaseModel):
     error: bool

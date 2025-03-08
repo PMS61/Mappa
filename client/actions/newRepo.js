@@ -4,10 +4,13 @@ import axios from "axios";
 
 export default async function createRepoAction(reponame) {
   try {
+    console.log(true);
     const token = cookies().get("token")?.value;
+    const org_id = cookies().get("org_id")?.value;
     const res = await axios.post("http://localhost:8000/repo/create-repo", {
       uid: token, // User ID from formData
       repo_name: reponame, // Repository name from formData
+      org_id: org_id,
     });
     const res2 = await axios.post("http://localhost:8000/access/set-access/", {
       uid: token,
