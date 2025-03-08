@@ -14,7 +14,6 @@ import fetchReposAction from "@/actions/allRepos"; // Ensure correct import path
 import Navbar from "../navbar";
 
 const Page = () => {
-  const [username, setUsername] = useState("");
   const [repositories, setRepositories] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentRepo, setCurrentRepo] = useState(null);
@@ -32,15 +31,11 @@ const Page = () => {
   const [newCollaboratorName, setNewCollaboratorName] = useState("");
   const [error, setError] = useState("");
   const [sidebarItems, setSidebarItems] = useState([]);
-  const [org, setOrg] = useState(null);
-  const [admin, setAdmin] = useState();
+  const [org, setOrg] = useState();
 
   useEffect(() => {
-    setUsername(Cookies.get("username") || "Guest");
-
     const fetchAllRepos = async () => {
       try {
-        setRepositories([]);
         const result = await fetchReposAction();
         if (result.success) {
           setRepositories(result.repos);
@@ -52,17 +47,16 @@ const Page = () => {
         console.error("Error fetching repositories:", error);
       }
     };
-
+    let orgItems = [];
     const fetchAllOrgs = async () => {
       try {
         const result = await fetchOrgsByUidAction();
-        console.log(result.orgs.orgs);
         if (result.success) {
-          const orgItems = result.orgs.orgs.map((org) => ({
-            icon: "🏢",
+          orgItems = result.orgs.orgs.map((org) => ({
+            icon: "🗂️",
             label: org.org_name,
             org_id: org.org_id,
-            color: "from-gray-500 to-gray-600",
+            color: "bg-cyan-500",
           }));
           setSidebarItems(orgItems);
         } else {
@@ -72,10 +66,10 @@ const Page = () => {
         console.error("Error fetching organizations:", error);
       }
     };
-
-    fetchAllRepos();
     fetchAllOrgs();
-    console.log(repositories.length);
+    if (org != undefined) {
+      fetchAllRepos();
+    }
   }, [repoMade, orgMade, org]);
 
   const handleAddRepo = async (e) => {
@@ -133,64 +127,66 @@ const Page = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 p-6 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e]">
       <div className="flex flex-row">
-        <div className="flex flex-col gap-4">
-          <p className="text-lg font-bold text-gray-700 mb-2 dark:text-gray-200">
-            Organizations
-          </p>
+        <div className="flex flex-col gap-4 px-2">
           <button
             onClick={() => setShowOrgModal(true)}
-            className="btn bg-blue-100 text-blue-800 hover:bg-blue-200 px-6 py-2 rounded-full flex items-center gap-2 dark:bg-blue-700 dark:text-blue-200 dark:hover:bg-blue-600 mt-4 mb-4"
+            className="rounded-3xl p-4 bg-blue-500 shadow-lg mb-6"
           >
-            Create Organization
+            <p className="text-xl font-bold text-white">Create Organization</p>
           </button>
-          {sidebarItems &&
-            sidebarItems.map((item, index) => (
-              <div
-                key={index}
-                className={`bg-gradient-to-br ${item.color} p-2 rounded-xl
+          <div className="p-4 flex flex-col gap-3 bg-white/90 backdrop-blur-md shadow-2xl rounded-xl border-2 border-yellow-200 dark:bg-gray-800/90 dark:border-gray-700">
+            {sidebarItems &&
+              sidebarItems.map((item, index) => (
+                <div
+                  key={index}
+                  className={`bg-gradient-to-br ${item.color} p-2 rounded-xl
+                        bg-white/90 backdrop-blur-md
                          shadow-lg hover:shadow-xl transition-all duration-300
                          transform hover:-translate-y-1 border border-yellow-100 dark:border-gray-700
-                         animate-fadeIn w-80 flex flex-row gap-4`}
-                onClick={() => {
-                  Cookies.set("org", item.label, { expires: 7 }); // Expires in 7 days
-                  Cookies.set("org_id", item.org_id);
-                  setOrg(item.label);
-                }}
-              >
-                <div className="flex flex-col gap-2">
-                  <h2 className="text-xl font-bold text-gray-700 dark:text-gray-200 self-center">
-                    {item.label}
-                  </h2>
-                  <p>{item.org_id}</p>
+                         animate-fadeIn flex flex-row gap-4`}
+                  onClick={() => {
+                    Cookies.set("org", item.label); // Expires in 7 days
+                    Cookies.set("org_id", item.org_id);
+                    setOrg(item.label);
+                  }}
+                >
+                  <div className="flex flex-row gap-2 cursor-pointer">
+                    <p>{item.icon}</p>
+                    <h2 className="text-xl font-bold text-gray-700 dark:text-gray-200 self-center">
+                      {item.label}
+                    </h2>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+          </div>
         </div>
-        <div className="max-w-7xl mx-auto">
+        <div className="w-5/6 mx-auto">
           <Navbar />
           <div className="mt-8 bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border-2 border-yellow-200 dark:bg-gray-800/90 dark:border-gray-700">
             {/* Header section */}
             <div className="flex flex-col md:flex-row gap-12 justify-between items-center mb-12">
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent mb-2 dark:from-blue-500 dark:to-purple-500">
-                  {org}, {username}! ✨
+                  {org}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
                   Here`s your personal dashboard
                 </p>
               </div>
-              <Button
-                onClick={() => setShowAddCollaboratorModal(true)}
-                className="btn bg-blue-100 text-blue-800 hover:bg-blue-200 px-6 rounded-full flex items-center gap-2 dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-600"
-                icon="➕"
-                label="Add Organization Collaborators"
-              />
-              <Button
-                onClick={() => setShowAddRepoModal(true)}
-                className="btn bg-green-100 text-green-800 hover:bg-green-200 px-6 rounded-full flex items-center gap-2 dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-600"
-                icon="➕"
-                label="Add Repo"
-              />
+              <div className="flex flex-row gap-4">
+                <Button
+                  onClick={() => setShowAddCollaboratorModal(true)}
+                  className="btn bg-blue-100 text-blue-800 hover:bg-blue-200 px-6 rounded-full flex items-center gap-2 dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-600"
+                  icon="➕"
+                  label="Add org collabs"
+                />
+                <Button
+                  onClick={() => setShowAddRepoModal(true)}
+                  className="btn bg-green-100 text-green-800 hover:bg-green-200 px-6 rounded-full flex items-center gap-2 dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-600"
+                  icon="➕"
+                  label="Add Repo"
+                />
+              </div>
             </div>
 
             {/* Repositories info cards */}
