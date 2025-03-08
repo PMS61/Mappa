@@ -41,6 +41,7 @@
     "codemirror": "^6.0.1",
     "date-fns": "^4.1.0",
     "diff": "^7.0.0",
+    "dotenv": "^16.4.7",
     "fs": "^0.0.1-security",
     "js-cookie": "^3.0.5",
     "liveblocks": "^0.0.3",
