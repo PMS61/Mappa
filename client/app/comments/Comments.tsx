@@ -13,7 +13,7 @@ export default function Comments() {
   useEffect(() => {
     const interval = setInterval(() => {
       refreshThreads();
-    }, 3000); // Refresh every 3 seconds
+    }, 500); // Refresh every 3 seconds
 
     return () => clearInterval(interval); // Cleanup on unmount
   }, [refreshThreads]);

@@ -66,10 +66,15 @@ const Page = () => {
         console.error("Error fetching organizations:", error);
       }
     };
-    fetchAllOrgs();
-    if (org != undefined) {
-      fetchAllRepos();
-    }
+
+    const intervalId = setInterval(() => {
+      fetchAllOrgs();
+      if (org != undefined) {
+        fetchAllRepos();
+      }
+    }, 500);
+
+    return () => clearInterval(intervalId);
   }, [repoMade, orgMade, org]);
 
   const handleAddRepo = async (e) => {

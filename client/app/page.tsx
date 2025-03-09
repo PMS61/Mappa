@@ -2,6 +2,27 @@
 import Navbar from "./navbar.jsx";
 import React from "react";
 
+const plans = [
+  {
+    name: "Free",
+    description: "Access core features with limited usage.",
+    features: ["Basic IDE", "Limited Repositories", "Community Support"],
+    style: "from-blue-600 to-purple-700",
+  },
+  {
+    name: "Pro",
+    description: "Unlimited access to all features.",
+    features: ["Unlimited IDE", "Unlimited Repositories", "Priority Support"],
+    style: "from-purple-600 to-indigo-700",
+  },
+  {
+    name: "Enterprise",
+    description: "Customize features for your team.",
+    features: ["Custom Features", "Dedicated Server", "Premium Support"],
+    style: "from-indigo-600 to-violet-700",
+  },
+];
+
 const Page = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e]">
@@ -63,7 +84,8 @@ const Page = () => {
         <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {[
             { title: "Secure", icon: "🔒", desc: "Your data is safe with us" },
-            { title: "Fast", icon: "⚡", desc: "Lightning quick responses" },
+            { title: "Fast", icon: "⚡", desc: "Lightning quick syncing" },
+            { title: "AI Chatbot", icon: "💬", desc: "MappaAI always at your service" },
           ].map((feature, index) => (
             <div
               key={index}
@@ -75,6 +97,25 @@ const Page = () => {
                 {feature.title}
               </h3>
               <p className="text-gray-600 dark:text-gray-400">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {plans.map((plan, index) => (
+            <div
+              key={index}
+              className={`bg-gradient-to-br ${plan.style} p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-purple-500 hover:scale-105`}
+            >
+              <h2 className="text-3xl font-bold text-center">{plan.name}</h2>
+              <p className="text-gray-200 text-center mt-2">{plan.description}</p>
+              <ul className="mt-4 text-gray-300">
+                {plan.features.map((feature, i) => (
+                  <li key={i} className="flex items-center gap-2 text-lg">
+                    ✅ {feature}
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>

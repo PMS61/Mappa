@@ -12,7 +12,7 @@ import { FaComments, FaRobot, FaVideo } from 'react-icons/fa'; // Import icons
 export default function CommentsPage({ roomId="global" }) {
   console.log("chat room id:", roomId)
   const username = Cookies.get("username");
-  const [activeFeature, setActiveFeature] = useState("comments");
+  const [activeFeature, setActiveFeature] = useState("discussions");
 
   return (
     <LiveblocksUIConfig
@@ -28,9 +28,9 @@ export default function CommentsPage({ roomId="global" }) {
             {activeFeature.charAt(0).toUpperCase() + activeFeature.slice(1)}
           </h2>
           <div className="flex justify-center space-x-4 p-2">
-            <button onClick={() => setActiveFeature("comments")} className="p-2 bg-blue-500 text-white rounded flex items-center space-x-2">
+            <button onClick={() => setActiveFeature("discussions")} className="p-2 bg-blue-500 text-white rounded flex items-center space-x-2">
               <FaComments />
-              <span>Comments</span>
+              <span>Discussions</span>
             </button>
             <button onClick={() => setActiveFeature("chatbot")} className="p-2 bg-blue-500 text-white rounded flex items-center space-x-2">
               <FaRobot />
@@ -42,7 +42,7 @@ export default function CommentsPage({ roomId="global" }) {
             </button>
           </div>
           <div className="flex-grow overflow-auto">
-            {activeFeature === "comments" && <Comments />}
+            {activeFeature === "discussions" && <Comments />}
             {activeFeature === "chatbot" && <Chatbot />}
             {activeFeature === "meet" && <Meet />}
           </div>

@@ -73,6 +73,10 @@ const Meet = () => {
             <FaVideo />
             <span>Schedule Meet</span>
           </button>
+          <button onClick={() => window.open('/meetings', '_blank')} className="p-3 bg-green-500 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-green-600 transition">
+            <FaVideo />
+            <span>Join Now</span>
+          </button>
         </div>
       </div>
       <div className="mt-8 mx-auto w-full max-w-4xl overflow-x-auto">
