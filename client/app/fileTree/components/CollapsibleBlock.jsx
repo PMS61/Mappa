@@ -1,4 +1,4 @@
-import { FaFolder, FaFolderOpen, FaFile, FaDraftingCompass, FaFileWord } from "react-icons/fa";
+import { FaFolder, FaFolderOpen, FaFile, FaDraftingCompass, FaFileWord, FaPython, FaJs } from "react-icons/fa";
 
 const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContextMenu }) => {
     if (name == ".hidden") return null;
@@ -8,6 +8,10 @@ const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContex
             return <FaDraftingCompass className="mr-3" />;
         } else if (fileName.toLowerCase().endsWith('.doc')) {
             return <FaFileWord className="mr-3" />;
+        } else if (fileName.toLowerCase().endsWith('.py')) {
+            return <FaPython className="mr-3" />;
+        } else if (fileName.toLowerCase().endsWith('.js')) {
+            return <FaJs className="mr-3" />;
         }
         return <FaFile className="mr-3" />;
     };
