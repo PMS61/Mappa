@@ -1,7 +1,17 @@
-import { FaFolder, FaFolderOpen, FaFile } from "react-icons/fa";
+import { FaFolder, FaFolderOpen, FaFile, FaDraftingCompass, FaFileWord } from "react-icons/fa";
 
 const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContextMenu }) => {
     if (name == ".hidden") return null;
+
+    const getFileIcon = (fileName) => {
+        if (fileName.toLowerCase().endsWith('.dwg')) {
+            return <FaDraftingCompass className="mr-3" />;
+        } else if (fileName.toLowerCase().endsWith('.doc')) {
+            return <FaFileWord className="mr-3" />;
+        }
+        return <FaFile className="mr-3" />;
+    };
+
     return (
         <div 
             className="py-1 px-5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
@@ -13,7 +23,7 @@ const CollapsibleBlock = ({ name, isFile, depth, onToggle, isCollapsed, onContex
                 onClick={onToggle}
             >
                 {isFile ? (
-                    <FaFile className="mr-3" />
+                    getFileIcon(name)
                 ) : (
                     isCollapsed ? <FaFolder className="mr-3" /> : <FaFolderOpen className="mr-3" />
                 )}
