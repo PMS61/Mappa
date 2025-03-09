@@ -10,14 +10,17 @@ export default function FileTree({ paths, room, repoName, addfile }) {
     const [localPaths, setLocalPaths] = useState(paths);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPath, setCurrentPath] = useState('');
+    const [newFolders, setNewFolders] = useState([]);
 
     useEffect(() => {
-        if (paths.length > 0) setLocalPaths(paths); 
-        else {
+        if (paths.length > 0) {
+            const mergedPaths = [...paths, ...newFolders];
+            setLocalPaths(mergedPaths);
+        } else {
             const temp = [{"room_id": Date.now().toString(), "path": `${repoName}/.hidden`}];
             setLocalPaths(temp);
         }
-    }, [paths, repoName, room]);
+    }, [paths, repoName, room, newFolders]);
 
     const handleCreateFileClick = (path) => {
         setCurrentPath(path);
@@ -26,7 +29,7 @@ export default function FileTree({ paths, room, repoName, addfile }) {
 
     const handleCreateFolderClick = (path) => {
         const folderName = prompt("Enter folder name");
-        createFolder(path, folderName, localPaths, setLocalPaths, null, room);
+        createFolder(path, folderName, localPaths, setLocalPaths, setNewFolders, room);
     };
 
     const handleFileClick = (roomId) => {

@@ -360,6 +360,7 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
   // Function to run the script
   const runScript = async () => {
     const scriptContent = Cookies.get("beta") || "";
+    console.log("Script content:", scriptContent);
     const filePathWithRepo = Cookies.get(`file_${activeTab}`) || "";
     const scriptLanguage = detectLanguage(filePathWithRepo);
 
