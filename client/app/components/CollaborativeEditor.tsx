@@ -34,6 +34,9 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
   const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
   const [isMergeEditorOpen, setIsMergeEditorOpen] = useState(false);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [terminalOutput, setTerminalOutput] = useState("");
+  const [terminalHeight, setTerminalHeight] = useState(200);
 
   // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
@@ -339,6 +342,68 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
     }
   };
 
+  // Function to detect language from file extension
+  const detectLanguage = (filePath: string) => {
+    const extension = filePath.split('.').pop();
+    switch (extension) {
+      case 'py':
+        return 'python';
+      case 'js':
+        return 'javascript';
+      case 'sh':
+        return 'bash';
+      default:
+        return 'python'; // Default to Python if unknown
+    }
+  };
+
+  // Function to run the script
+  const runScript = async () => {
+    const scriptContent = Cookies.get("beta") || "";
+    const filePathWithRepo = Cookies.get(`file_${activeTab}`) || "";
+    const scriptLanguage = detectLanguage(filePathWithRepo);
+
+    try {
+      const response = await fetch("http://localhost:8000/run-script", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ script: scriptContent, language: scriptLanguage }),
+      });
+      const data = await response.json();
+      setTerminalOutput(data.output);
+    } catch (error) {
+      console.error("Error running script:", error);
+      setTerminalOutput("Error running script");
+    }
+  };
+
+  useEffect(() => {
+    if (isTerminalOpen) {
+      runScript();
+    }
+  }, [isTerminalOpen]);
+
+  // Function to handle terminal resize
+  const handleResize = (e: React.MouseEvent) => {
+    const startY = e.clientY;
+    const startHeight = terminalHeight;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const newHeight = startHeight + (startY - e.clientY);
+      setTerminalHeight(newHeight);
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.editorHeader}>
@@ -403,6 +468,25 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
       >
         Merge Conflicts
       </button>
+      <button
+        className="btn btn-black"
+        onClick={() => setIsTerminalOpen(true)}
+        title="Open Terminal"
+        style={{ position: "absolute", bottom: "10px", left: "150px" }}
+      >
+        Run Code
+      </button>
+      {isTerminalOpen && (
+        <div className={styles.terminalContainer} style={{ height: `${terminalHeight}px` }}>
+          <div className={styles.resizeHandle} onMouseDown={handleResize}></div>
+          <div className={styles.terminalHeader}>
+            <button onClick={() => setIsTerminalOpen(false)}>Close Terminal</button>
+          </div>
+          <div className={styles.terminalContent}>
+            <pre>{terminalOutput}</pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
