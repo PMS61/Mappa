@@ -7,7 +7,7 @@ import "@liveblocks/react-ui/styles/dark/attributes.css";
 import "@liveblocks/react-tiptap/styles.css";
 
 export const metadata = {
-  title: "Liveblocks",
+  title: "Mappa",
 };
 
 export default function RootLayout({
