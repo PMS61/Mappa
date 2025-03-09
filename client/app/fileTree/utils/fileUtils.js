@@ -24,7 +24,7 @@ export const createFile = async (room, parentPath, fileName, localPaths, setLoca
     const updatedPaths = [...localPaths, newPathObj];
     setLocalPaths(updatedPaths);
 
-    if (fileName.slice(-3) !== "dwg") {
+    if (!(fileName.slice(-3) === "dwg" || fileName.slice(-3) === "doc")) {
         window.dispatchEvent(new CustomEvent('add-tab', { detail: { id: roomId, name: fileName } }));
     }
     return roomId;

@@ -36,6 +36,9 @@ export default function FileTree({ paths, room, repoName, addfile }) {
             const filename = file.path.split('/').pop();
             if (filename.slice(-3) === "dwg") {
                 window.open(`/drawing-board/${roomId}`, "_blank", "noopener,noreferrer");
+            }
+            else if (filename.slice(-3) === "doc"){
+                window.open(`/text-editor/${roomId}`, "_blank", "noopener,noreferrer");
             } else {
                 addfile({ id: roomId, name: filename });
             }
