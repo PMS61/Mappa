@@ -13,7 +13,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @router.post("/login", response_model=userResMod)
 async def login(req: loginReqMod):
-    response = supabase.table("login").select("uid, password ,username").eq("email", req.email).single().execute()
+    response = supabase.table("users").select("uid, password ,username").eq("email", req.email).single().execute()
     if not response.data:
         return {"error": True, "token": ""}
     user = response.data
@@ -23,11 +23,11 @@ async def login(req: loginReqMod):
 
 @router.post("/register", response_model=userResMod)
 async def register(req: userReqMod):
-    response = supabase.table("login").select("uid").eq("email", req.email).execute()
+    response = supabase.table("users").select("uid").eq("email", req.email).execute()
     if response.data:
         return {"error": True, "token": ""}
     hash_pass = hashed_pass(req.password)
-    response = supabase.table("login").insert({
+    response = supabase.table("users").insert({
         "uid": str(uuid.uuid4()),
         "email": req.email,
         "password": hash_pass,
