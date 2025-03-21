@@ -13,12 +13,12 @@ export default async function fetchReposAction() {
     if (res.status === 200 && !res.data.error) {
       return { success: true, repos: res.data };
     }
-    return { success: false, error: res.data.detail };
+    return { success: false, error:true };
   } catch (error) {
     console.error(
       "Error fetching repositories:",
       error.response?.data?.detail || error.message,
     );
-    return { success: false, error: "Something went wrong" };
+    return { success: false, error: true };
   }
 }

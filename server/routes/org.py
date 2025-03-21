@@ -22,7 +22,7 @@ async def add_org(req: OrgReq):
             "uid": str(req.uid)
         }
     else:
-        user_response = supabase.table("login").select("*").eq("username", req.username).execute()
+        user_response = supabase.table("users").select("*").eq("username", req.username).execute()
 
         if not user_response.data:  # Check if user does not exist
             raise HTTPException(status_code=404, detail="User not found")
@@ -34,20 +34,20 @@ async def add_org(req: OrgReq):
             "org_name": req.org_name,
             "uid": str(uid)
         }
-    print(org_data)
-    response = supabase.table("org").insert(org_data).execute()
+    response = supabase.table("organisations").insert(org_data).execute()
     if not response.data:
         raise HTTPException(status_code=500, detail="Failed to add organization")
     return {"org_id": str(org_data["org_id"]), "org_name": req.org_name, "error": False}
 
 @router.post("/get-orgs-by-uid/", response_model=OrgByUIDResponse)
 async def get_orgs_by_uid(req: OrgByUIDRequest):
-    # Fetch the org_id and org_name from the org table where uid matches
-    response = supabase.table("org").select("org_id, org_name").eq("uid", str(req.uid)).execute()
-
-    if not response.data:
-        raise HTTPException(status_code=404, detail="No organizations found for the given UID")
-
-    orgs = [OrgInfo(org_id=UUID(org["org_id"]), org_name=org["org_name"]) for org in response.data]
-
-    return {"orgs": orgs, "error": False}
+    try:
+        response = supabase.table("organisations").select("org_id, org_name").eq("uid", str(req.uid)).execute()
+        if not response.data:
+            # Return a custom response with error=True if no organizations are found
+            return {"orgs": [], "error": True, "detail": "No organizations found for the given UID"}
+        orgs = [OrgInfo(org_id=UUID(org["org_id"]), org_name=org["org_name"]) for org in response.data]
+        return {"orgs": orgs, "error": False}
+    except Exception as e:
+        # Log the error and return a response with error: true
+        return {"orgs": [], "error": True, "detail": str(e)}

@@ -20,7 +20,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 @router.post("/add-collab/",response_model=ARepoResMod)
 async def add_repo(req: NewRepoRequest):
     # Find the user in the login table
-    user_response = supabase.table("login").select("*").eq("username", req.username).execute()
+    user_response = supabase.table("users").select("*").eq("username", req.username).execute()
     
     if not user_response.data:  # Check if user does not exist
         raise HTTPException(status_code=404, detail="User not found")
@@ -34,7 +34,6 @@ async def add_repo(req: NewRepoRequest):
         "uid": uid,
         "repo_name": req.repo_name
     }
-    print(repo_data)
     response = supabase.table("repo").insert(repo_data).execute()
 
     if not response.data:

@@ -12,6 +12,7 @@ import {
 } from "@/actions/org"; // Ensure correct import path
 import fetchReposAction from "@/actions/allRepos"; // Ensure correct import path
 import Navbar from "../navbar";
+import { get } from "http";
 
 const Page = () => {
   const [repositories, setRepositories] = useState([]);
@@ -32,6 +33,7 @@ const Page = () => {
   const [error, setError] = useState("");
   const [sidebarItems, setSidebarItems] = useState([]);
   const [org, setOrg] = useState();
+  const [getOrgErr,setGetOrgErr] = useState(false);
 
   useEffect(() => {
     const fetchAllRepos = async () => {
@@ -41,6 +43,7 @@ const Page = () => {
           setRepositories(result.repos);
           console.log(result.repos);
         } else {
+          setRepositories([])
           console.error(result.error);
         }
       } catch (error) {
@@ -59,23 +62,27 @@ const Page = () => {
             color: "bg-cyan-500",
           }));
           setSidebarItems(orgItems);
+          setGetOrgErr(false);
         } else {
+          setGetOrgErr(true);
           console.error(result.error);
         }
       } catch (error) {
+        setGetOrgErr(true);
         console.error("Error fetching organizations:", error);
       }
     };
+    fetchAllOrgs();
+    fetchAllRepos();
+    // const intervalId = setInterval(() => {
+    //   fetchAllOrgs();
+    //   if (org != undefined) {
+    //     fetchAllRepos();
+    //   }
+    // }, 500);
 
-    const intervalId = setInterval(() => {
-      fetchAllOrgs();
-      if (org != undefined) {
-        fetchAllRepos();
-      }
-    }, 500);
-
-    return () => clearInterval(intervalId);
-  }, [repoMade, orgMade, org]);
+    // return () => clearInterval(intervalId);
+  }, [repoMade, orgMade, org,getOrgErr]);
 
   const handleAddRepo = async (e) => {
     e.preventDefault();

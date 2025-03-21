@@ -68,7 +68,7 @@ export async function fetchOrgsByUidAction() {
     if (res.status === 200 && !res.data.error) {
       return { success: true, orgs: res.data };
     }
-    return { success: false, error: false };
+    return { success: false, error: true };
   } catch (error) {
     console.error(
       "Error fetching organizations:",

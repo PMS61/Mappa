@@ -16,7 +16,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 async def create_repo(req: RepoRequestModel):
     repo_id = str(uuid.uuid4())
 
-    res = supabase.table("org").select("uid").eq("org_id", str(req.org_id)).execute()
+    res = supabase.table("organisations").select("uid").eq("org_id", str(req.org_id)).execute()
     if not res.data:
         raise HTTPException(status_code=404, detail="Organization not found")
 
@@ -43,7 +43,7 @@ async def create_repo(req: RepoRequestModel):
 @router.post("/create-file", response_model=FileResponseModel)
 async def create_file(req: FileRequestModel):
     file_id = str(uuid.uuid4())
-    response = supabase.table("filesys").insert({
+    response = supabase.table("files").insert({
         "file_id": file_id,
         "repo_id": req.repo_id,
         "path": req.path,
