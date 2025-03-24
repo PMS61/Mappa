@@ -3,11 +3,11 @@ import Cookies from "js-cookie";
 import VersionPage from "../components/viewVersion";
 import React, { useEffect, useState } from "react";
 import FileTree from "../fileTree/page";
-import Chat from "../chat/page";
+// import Chat from "../chat/page";
 import Editor from "../editor/page";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import CommentsPage from "../comments/page";
-// import Home from "../drawing-board/page";
+import Placeholder from "../placeholder/page";
 
 const ResizeHandle = () => {
   return <PanelResizeHandle className="panel-resize-handle" />;
@@ -18,7 +18,7 @@ const Codespace = () => {
   const [repoName, setRepoName] = useState("default-repo");
 
   const [tabs, setTabs] = useState([
-    { id: "welcome", name: "Welcome!!" },
+    // { id: "welcome", name: "Welcome!!" },
   ]);
   const [active_state, setActiveState] = useState("welcome");
 
@@ -48,12 +48,19 @@ const Codespace = () => {
       <ResizeHandle />
 
       <Panel defaultSize={60} minSize={30}>
-        <Editor 
-          tabs={tabs}
-          setTabs={setTabs}
-          activeTab={active_state}
-          setActiveTab={setActiveState}
-        />
+        {tabs.length === 0 ? 
+        (
+          <Placeholder />
+        )
+        : 
+        (
+          <Editor 
+            tabs={tabs}
+            setTabs={setTabs}
+            activeTab={active_state}
+            setActiveTab={setActiveState}
+          />
+        )}
       </Panel>
 
       <ResizeHandle />

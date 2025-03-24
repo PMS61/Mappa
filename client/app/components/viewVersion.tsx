@@ -3,11 +3,25 @@
 import React, { useState } from "react";
 import getVersionAction from "@/actions/getVersions";
 import readVersionAction from "@/actions/readVersion";
+import dynamic from "next/dynamic";
+
+// Import the DisplayFileContent component dynamically to avoid SSR issues with browser-specific features
+const DisplayFileContent = dynamic(
+  () => import("../display-file-content/page"),
+  { ssr: false }
+);
+
 const VersionPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isReadOnlyModalOpen, setIsReadOnlyModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [inpData, setInpData] = useState([]);
+  const [showFileContent, setShowFileContent] = useState(false);
+  const [fileData, setFileData] = useState({
+    content: "",
+    fileName: "",
+    path: ""
+  });
+  
   const toggleModal = async (e) => {
     e.preventDefault();
     setIsModalOpen(!isModalOpen);
@@ -18,33 +32,26 @@ const VersionPage = () => {
     }
   };
 
-  const toggleReadOnlyModal = () => {
-    setIsReadOnlyModalOpen(!isReadOnlyModalOpen);
-  };
-  const dummyData = [
-    { version: "1.0.0", description: "Initial release", username: "admin" },
-    {
-      version: "1.1.0",
-      description: "Added new features",
-      username: "developer",
-    },
-    { version: "1.2.0", description: "Bug fixes", username: "tester" },
-  ];
   const [getVer, setVer] = useState();
   const handleRowClick = (index, version) => {
     setVer(version);
     setSelectedRow(index);
   };
 
-  const [readVer, setReadVer] = useState({});
   const handleReadOnly = async () => {
-    setIsModalOpen(false);
-    setIsReadOnlyModalOpen(true);
     try {
       const { success, data } = await readVersionAction(getVer);
       if (success) {
-        console.log(data);
-        setReadVer(data);
+        // Store the file data in component state
+        setFileData({
+          content: data.content || "",
+          fileName: data.path?.split('/').pop() || "Untitled",
+          path: data.path || ""
+        });
+        
+        // Close the modal and show the file content display
+        setIsModalOpen(false);
+        setShowFileContent(true);
       }
     } catch (e) {
       console.log(e);
@@ -69,6 +76,12 @@ const VersionPage = () => {
     }
   };
 
+  const handleCloseFileContent = () => {
+    setShowFileContent(false);
+    setFileData({ content: "", fileName: "", path: "" });
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="absolute bottom-5 left-5">
       <button
@@ -79,7 +92,7 @@ const VersionPage = () => {
       </button>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg dark:bg-gray-800">
             <h2 className="text-2xl dark:text-white font-bold mb-4">
               Version Information
@@ -145,26 +158,16 @@ const VersionPage = () => {
         </div>
       )}
 
-      {isReadOnlyModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-8 rounded-lg shadow-lg dark:bg-gray-800">
-            <h2 className="text-2xl dark:text-white font-bold mb-4">
-              Read Only Version Details
-            </h2>
-            <p className="text-gray-800 dark:text-gray-200">
-              <strong>Path:</strong> {readVer?.path}
-            </p>
-            <p className="text-gray-800 dark:text-gray-200">
-              <strong>Content:</strong>
-              <pre className="whitespace-pre-wrap">{readVer?.content}</pre>
-            </p>
-            <button
-              onClick={toggleReadOnlyModal}
-              className="mt-4 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-            >
-              Close
-            </button>
-          </div>
+      {showFileContent && (
+        <div className="fixed inset-0 z-50">
+          <DisplayFileContent 
+            onClose={handleCloseFileContent} 
+            version={getVer} 
+            isVersionView={true}
+            fileContent={fileData.content}
+            fileName={fileData.fileName}
+            filePath={fileData.path}
+          />
         </div>
       )}
     </div>

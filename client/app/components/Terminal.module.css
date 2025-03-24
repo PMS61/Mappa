@@ -1,0 +1,128 @@
+.terminalContainer {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  max-height: 80vh;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e1e1e;
+  color: #f8f8f8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  border: 1px solid #333;
+}
+
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+  background-color: transparent;
+}
+
+.terminalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: #2d2d2d;
+  border-bottom: 1px solid #444;
+  user-select: none;
+}
+
+.terminalControls {
+  display: flex;
+  align-items: center;
+}
+
+.terminalDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.terminalTitle {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.terminalActions {
+  display: flex;
+  gap: 8px;
+}
+
+.terminalButton {
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.terminalButton:hover {
+  background-color: #555;
+}
+
+.terminalButton:disabled {
+  background-color: #333;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.terminalContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  background-color: #1e1e1e;
+}
+
+.terminalContent pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .terminalContainer {
+    min-height: 150px;
+  }
+  
+  .terminalHeader {
+    padding: 6px 8px;
+  }
+  
+  .terminalDot {
+    width: 10px;
+    height: 10px;
+    margin-right: 4px;
+  }
+  
+  .terminalTitle {
+    font-size: 12px;
+  }
+  
+  .terminalButton {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  
+  .terminalContent {
+    padding: 8px;
+  }
+  
+  .terminalContent pre {
+    font-size: 12px;
+  }
+}

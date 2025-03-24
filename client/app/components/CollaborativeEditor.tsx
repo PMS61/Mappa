@@ -16,6 +16,8 @@ import { createNewRoom } from "../editor/Room";
 import Cookies from "js-cookie";
 import dynamic from "next/dynamic";
 import { Octokit } from "@octokit/rest";
+import { useRouter } from "next/navigation";
+import { Terminal, TerminalRef } from "./Terminal";
 const MergeEditor = dynamic(() => import("../merge-editor/page"), { ssr: false });
 
 const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN || "";
@@ -24,19 +26,17 @@ const octokit = new Octokit({ auth: GITHUB_TOKEN });
 // Collaborative code editor with file tabs, live cursors, and live avatars
 export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) {
   const room = useRoom();
+  const router = useRouter();
   const [element, setElement] = useState<HTMLElement>();
-  // const [tabs, setTabs] = useState([
-  //   { id: "1", name: "index.js" },
-  //   { id: "2", name: "styles.css" },
-  // ]);
-  // const [activeTab, setActiveTab] = useState("1");
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
   const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
   const [isMergeEditorOpen, setIsMergeEditorOpen] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
-  const [terminalOutput, setTerminalOutput] = useState("");
-  const [terminalHeight, setTerminalHeight] = useState(200);
+  const [terminalHeight, setTerminalHeight] = useState(250);
+  
+  // Reference to terminal component
+  const terminalRef = useRef<TerminalRef>(null);
 
   // Get user info from Liveblocks authentication endpoint
   const userInfo = useSelf((me) => me.info);
@@ -185,17 +185,20 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
 
   // Clean up ydoc when tab is closed
   const handleTabClose = (id: string) => {
-    if (tabs.length > 1) {
+    if (tabs.length >= 1) {
       const ydoc = ydocsRef.current.get(id);
       if (ydoc) {
         ydoc.destroy();
         ydocsRef.current.delete(id);
       }
       setTabs(tabs.filter((tab) => tab.id !== id));
-      if (activeTab === id) {
-        setActiveTab(tabs[0].id);
-      }
     }
+    if (tabs.length > 1 && activeTab === id) {
+      setActiveTab(tabs[0].id);
+    }
+    // else if (tabs.length === 1) {
+    //   setActive(null);
+    // }
   };
 
   // Function to switch to the next tab
@@ -297,6 +300,18 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
         basicSetup,
         javascript(),
         yCollab(ytext, provider.awareness),
+        EditorView.theme({
+          "&": {
+            height: "100%",
+            overflow: "auto"
+          },
+          ".cm-scroller": {
+            overflow: "auto"
+          },
+          ".cm-content": {
+            minHeight: "100%"
+          }
+        }),
         EditorView.domEventHandlers({
           keydown: (event) => {
             // Only prevent Tab when Ctrl/Cmd is pressed
@@ -342,67 +357,27 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
     }
   };
 
-  // Function to detect language from file extension
-  const detectLanguage = (filePath: string) => {
-    const extension = filePath.split('.').pop();
-    switch (extension) {
-      case 'py':
-        return 'python';
-      case 'js':
-        return 'javascript';
-      case 'sh':
-        return 'bash';
-      default:
-        return 'python'; // Default to Python if unknown
-    }
-  };
-
-  // Function to run the script
-  const runScript = async () => {
-    const scriptContent = Cookies.get("beta") || "";
-    console.log("Script content:", scriptContent);
-    const filePathWithRepo = Cookies.get(`file_${activeTab}`) || "";
-    const scriptLanguage = detectLanguage(filePathWithRepo);
-
-    try {
-      const response = await fetch("http://localhost:8000/run-script", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ script: scriptContent, language: scriptLanguage }),
-      });
-      const data = await response.json();
-      setTerminalOutput(data.output);
-    } catch (error) {
-      console.error("Error running script:", error);
-      setTerminalOutput("Error running script");
-    }
-  };
-
+  // Update cookies when active tab changes
   useEffect(() => {
-    if (isTerminalOpen) {
-      runScript();
+    if (activeTab) {
+      Cookies.set("activeTab", activeTab);
     }
-  }, [isTerminalOpen]);
+  }, [activeTab]);
 
-  // Function to handle terminal resize
-  const handleResize = (e: React.MouseEvent) => {
-    const startY = e.clientY;
-    const startHeight = terminalHeight;
-
-    const onMouseMove = (e: MouseEvent) => {
-      const newHeight = startHeight + (startY - e.clientY);
-      setTerminalHeight(newHeight);
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    };
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+  // Toggle terminal and run code if opening
+  const toggleTerminal = () => {
+    if (!isTerminalOpen) {
+      setIsTerminalOpen(true);
+      // We need to use setTimeout because the terminal component 
+      // needs to be rendered before we can access its ref
+      setTimeout(() => {
+        if (terminalRef.current) {
+          terminalRef.current.runScript();
+        }
+      }, 100);
+    } else {
+      setIsTerminalOpen(false);
+    }
   };
 
   return (
@@ -432,7 +407,14 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
         </div>
         <Avatars />
       </div>
-      <div className={styles.editorContainer} ref={ref}></div>
+      <div 
+        className={styles.editorContainer} 
+        ref={ref}
+        style={{ 
+          height: isTerminalOpen ? `calc(100% - ${terminalHeight}px)` : '100%',
+          transition: 'height 0.3s ease-in-out'
+        }}
+      ></div>
       <CommitModal
         isOpen={isCommitModalOpen}
         onClose={() => setIsCommitModalOpen(false)}
@@ -471,21 +453,21 @@ export function CollaborativeEditor({ tabs, setTabs, activeTab, setActiveTab }) 
       </button>
       <button
         className="btn btn-black"
-        onClick={() => setIsTerminalOpen(true)}
-        title="Open Terminal"
+        onClick={toggleTerminal}
+        title={isTerminalOpen ? "Close Terminal" : "Open Terminal"}
         style={{ position: "absolute", bottom: "10px", left: "150px" }}
       >
-        Run Code
+        {isTerminalOpen ? "Hide Terminal" : "Run Code"}
       </button>
+      
+      {/* Terminal at bottom of editor */}
       {isTerminalOpen && (
-        <div className={styles.terminalContainer} style={{ height: `${terminalHeight}px` }}>
-          <div className={styles.resizeHandle} onMouseDown={handleResize}></div>
-          <div className={styles.terminalHeader}>
-            <button onClick={() => setIsTerminalOpen(false)}>Close Terminal</button>
-          </div>
-          <div className={styles.terminalContent}>
-            <pre>{terminalOutput}</pre>
-          </div>
+        <div className={styles.inlineTerminalWrapper}>
+          <Terminal 
+            ref={terminalRef}
+            height={terminalHeight} 
+            onClose={() => setIsTerminalOpen(false)}
+          />
         </div>
       )}
     </div>

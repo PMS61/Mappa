@@ -1,0 +1,105 @@
+/* File content display styles */
+.file-content-wrapper {
+  transition: all 0.2s ease;
+}
+
+.file-header {
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.file-display-container {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(237,242,255,0.9) 50%, rgba(240,240,255,0.85) 100%);
+}
+
+.content-panel {
+  background-color: white;
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 10px 10px -5px rgba(124, 58, 237, 0.05);
+  border: 1px solid rgba(199, 210, 254, 0.3);
+}
+
+.panel-header, .panel-footer {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(147, 197, 253, 0.3);
+}
+
+.content-display {
+  border-left: 4px solid rgba(147, 197, 253, 0.4);
+  background-color: white;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .file-header {
+    border-color: rgba(75, 85, 99, 0.5);
+  }
+
+  .file-display-container {
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(224,231,255,0.85) 50%, rgba(224,224,255,0.8) 100%);
+  }
+  
+  .content-panel {
+    background-color: white;
+    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15), 0 8px 10px -6px rgba(124, 58, 237, 0.1);
+  }
+  
+  .panel-header, .panel-footer {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .content-display pre {
+    color: #1e3a8a !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none;
+  }
+  
+  body {
+    color: #000;
+    background: #fff;
+  }
+  
+  .file-content-wrapper {
+    border: none;
+    box-shadow: none;
+  }
+
+  .content-panel {
+    border: none;
+    box-shadow: none;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .file-content {
+    font-size: 12px;
+  }
+
+  .file-display-container {
+    padding: 0.5rem;
+  }
+}
+
+/* Syntax highlighting overrides */
+.syntax-highlighter {
+  border-radius: 0.375rem;
+}
+
+/* Custom scrollbar for content */
+.content-display::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.content-display::-webkit-scrollbar-track {
+  background: rgba(219, 234, 254, 0.3);
+}
+
+.content-display::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+  border-radius: 4px;
+}
