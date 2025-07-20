@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CollapsibleBlock from './CollapsibleBlock';
-import ContextMenu from './ContextMenu';
+import ContextMenu from './ContextMenu'; // Ensure this import is present
 import { buildFileTree } from '../utils/fileUtils';
 
-const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handleFileClick, repoName }) => {
+const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handleFileClick, repoName, handleUploadFileClick, handleUploadFolderClick }) => {
     const [collapsed, setCollapsed] = useState({});
     const [contextMenu, setContextMenu] = useState(null);
     const router = useRouter();
@@ -82,6 +82,8 @@ const TreeView = ({ paths, handleCreateFileClick, handleCreateFolderClick, handl
                 contextMenu={contextMenu}
                 handleCreateFileClick={handleCreateFileClick}
                 handleCreateFolderClick={handleCreateFolderClick}
+                handleUploadFileClick={handleUploadFileClick} // New prop
+                handleUploadFolderClick={handleUploadFolderClick} // New prop
                 handleClose={() => setContextMenu(null)}
             />
         </div>
