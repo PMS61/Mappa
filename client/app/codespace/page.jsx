@@ -1,32 +1,22 @@
 "use client";
 import Cookies from "js-cookie";
-import VersionPage from "../components/viewVersion";
 import React, { useEffect, useState } from "react";
 import FileTree from "../fileTree/page";
-// import Chat from "../chat/page";
 import Editor from "../editor/page";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import CommentsPage from "../comments/page";
 import Placeholder from "../placeholder/page";
-
-const ResizeHandle = () => {
-  return <PanelResizeHandle className="panel-resize-handle" />;
-};
+import VersionPage from "../components/viewVersion";
 
 const Codespace = () => {
   const [room, setRoom] = useState("default-room");
   const [repoName, setRepoName] = useState("default-repo");
-
-  const [tabs, setTabs] = useState([
-    // { id: "welcome", name: "Welcome!!" },
-  ]);
-  const [active_state, setActiveState] = useState("welcome");
+  const [tabs, setTabs] = useState([]);
+  const [activeTab, setActiveTab] = useState(null);
 
   useEffect(() => {
     const repo_id = Cookies.get("repo_id");
     const repo_name = Cookies.get("repo_name");
-    console.log("repo_id", repo_id);
-    console.log("repo_name", repo_name);
 
     if (repo_id && repo_name) {
       setRoom(repo_id);
@@ -34,47 +24,50 @@ const Codespace = () => {
     }
   }, []);
 
+  const handleSetActiveTab = (tabId) => {
+    setActiveTab(tabId);
+  };
+
+  const handleSetTabs = (newTabs) => {
+    setTabs(newTabs);
+  };
+
   return (
-    <PanelGroup direction="horizontal" className="relative">
-      <Panel defaultSize={15} minSize={10}>
-        <FileTree 
-          room={room} 
-          repoName={repoName}
-          tabs={tabs}
-          setTabs={setTabs}
-          setActiveTab={setActiveState}  
-        />
-      </Panel>
-      <ResizeHandle />
-
-      <Panel defaultSize={60} minSize={30}>
-        {tabs.length === 0 ? 
-        (
-          <Placeholder />
-        )
-        : 
-        (
-          <Editor 
+    <div className="flex h-screen w-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <PanelGroup direction="horizontal" className="flex-grow">
+        <Panel defaultSize={15} minSize={10} className="flex flex-col">
+          <FileTree
+            room={room}
+            repoName={repoName}
             tabs={tabs}
-            setTabs={setTabs}
-            activeTab={active_state}
-            setActiveTab={setActiveState}
+            setTabs={handleSetTabs}
+            setActiveTab={handleSetActiveTab}
           />
-        )}
-      </Panel>
+        </Panel>
 
-      <ResizeHandle />
+        <PanelResizeHandle className="w-1 bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 dark:hover:bg-blue-400 transition-colors duration-200 cursor-col-resize" />
 
-      <Panel defaultSize={25} minSize={15}>
-        <CommentsPage
-          roomId={room}
-        />
-      </Panel>
-      {/* <button className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-blue-600 absolute left-6 bottom-20">
-        Merge Conflicts
-      </button> */}
+        <Panel defaultSize={60} minSize={30} className="flex flex-col">
+          {tabs.length === 0 ? (
+            <Placeholder />
+          ) : (
+            <Editor
+              tabs={tabs}
+              setTabs={handleSetTabs}
+              activeTab={activeTab}
+              setActiveTab={handleSetActiveTab}
+            />
+          )}
+        </Panel>
+
+        <PanelResizeHandle className="w-1 bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 dark:hover:bg-blue-400 transition-colors duration-200 cursor-col-resize" />
+
+        <Panel defaultSize={25} minSize={15} className="flex flex-col">
+          <CommentsPage roomId={room} />
+        </Panel>
+      </PanelGroup>
       <VersionPage />
-    </PanelGroup>
+    </div>
   );
 };
 

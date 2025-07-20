@@ -21,7 +21,7 @@ async def create_room(req: RoomRequestModel):
         "repo_id": req.repo_id,
         "path": req.path
     }).execute()
-    
+
     # Log the full response for debugging
     logger.info(f"Supabase response: {response}")
 
@@ -29,9 +29,9 @@ async def create_room(req: RoomRequestModel):
         error_message = response.error.message if response.error else "Unknown error"
         logger.error(f"Failed to create room: {error_message}")
         raise HTTPException(status_code=500, detail=f"Failed to create room: {error_message}")
-    
+
     logger.info(f"Room created successfully with ID {req.room_id}")
-    
+
     return {"error": False, "message": "Room created successfully"}
 
 @router.post("/get-room-and-path", response_model=RoomAndPathResponseModel)
@@ -41,7 +41,7 @@ async def get_room_and_path(req: RoomAndPathRequestModel):
         error_message = response.error.message if response.error else "Unknown error"
         logger.error(f"Failed to get room and path: {error_message}")
         raise HTTPException(status_code=500, detail=f"Failed to get room and path: {error_message}")
-    
+
     rooms = [{"room_id": room["room_id"], "path": room["path"]} for room in response.data]
     return {"error": False, "message": "Rooms and paths retrieved successfully", "rooms": rooms}
 
@@ -57,5 +57,16 @@ async def create_new_file(req: NewFileRequestModel):
         error_message = response.error.message if response.error else "Unknown error"
         logger.error(f"Failed to create new file: {error_message}")
         raise HTTPException(status_code=500, detail=f"Failed to create new file: {error_message}")
-    
+
     return {"error": False, "message": "New file created successfully", "room_id": room_id}
+
+@router.delete("/delete-file")
+async def delete_file(path: str, repo_id: str):
+    try:
+        response = supabase.table("room").delete().eq("path", path).eq("repo_id", repo_id).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="File not found or could not be deleted")
+        return {"error": False, "message": "File deleted successfully"}
+    except Exception as e:
+        logger.error(f"Error deleting file: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -2,15 +2,22 @@ import React, { useState } from "react";
 import addCollabAction from "@/actions/addCollab";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { FaUserPlus, FaCode, FaTimes } from "react-icons/fa";
+
 const CardWithModal = ({ index, icon, label, value, color }) => {
   const [showAddCollabModal, setShowAddCollabModal] = useState(false);
   const [newCollaborator, setNewCollaborator] = useState("");
   const [accessType, setAccessType] = useState("view");
   const [collaborators, setCollaborators] = useState([]);
   const [repoMade, setRepoMade] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
+
   const handleAddCollaborator = async (e) => {
     e.preventDefault();
+    setError("");
+    setRepoMade(false);
+
     try {
       const result = await addCollabAction(
         newCollaborator,
@@ -26,105 +33,143 @@ const CardWithModal = ({ index, icon, label, value, color }) => {
         setNewCollaborator("");
         setAccessType("view");
         setRepoMade(true);
-        setShowModal(false);
+        setTimeout(() => {
+          setShowAddCollabModal(false);
+          setRepoMade(false);
+        }, 2000); // Close modal after 2 seconds
       } else {
-        console.error(result.error);
+        setError(result.error || "Failed to add collaborator.");
       }
     } catch (e) {
       console.log(e);
+      setError("An unexpected error occurred.");
     }
   };
+
+  const handleOpenCodeSpace = () => {
+    Cookies.set("repo_id", value, { expires: 10 });
+    Cookies.set("repo_name", label, { expires: 10 });
+    router.push("/codespace");
+  };
+
   return (
-    <div className={`p-4 rounded-lg shadow-lg bg-gradient-to-br ${color}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">{icon}</span>
-          <div>
-            <h3 className="text-lg font-bold">{label}</h3>
-            <p className="text-[10px]">{value}</p>
+    <>
+      <div
+        className={`bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200 dark:border-gray-700 animate-fadeIn`}
+        style={{ animationDelay: `${index * 0.1}s` }}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex items-center mb-4">
+            <span className="text-3xl mr-4 text-blue-500">{icon}</span>
+            <div>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                {label}
+              </h3>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <button
-            onClick={() => setShowAddCollabModal(true)}
-            className="btn btn-warning"
-          >
-            Add Collab
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              Cookies.set("repo_id", value, { expires: 10 });
-              Cookies.set("repo_name", label, { expires: 10 });
-              router.push("/codespace");
-              console.log(value);
-            }}
-          >
-            CodeSpace
-          </button>
+          <div className="mt-auto flex gap-3">
+            <button
+              onClick={() => setShowAddCollabModal(true)}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600"
+            >
+              <FaUserPlus />
+              Add Collab
+            </button>
+            <button
+              onClick={handleOpenCodeSpace}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+            >
+              <FaCode />
+              CodeSpace
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Add Collaborator Modal */}
       {showAddCollabModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 w-96">
-            {repoMade ? (
-              <div role="alert" className="alert alert-success">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 shrink-0 stroke-current"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>New Collaborator Added Successfully!</span>
-              </div>
-            ) : (
-              ""
-            )}
-            <h2 className="text-xl font-bold mb-4">
-              Add Collaborator to {label}
-            </h2>
-            <input
-              type="text"
-              value={newCollaborator}
-              onChange={(e) => setNewCollaborator(e.target.value)}
-              placeholder="Enter collaborator name"
-              className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-            <select
-              value={accessType}
-              onChange={(e) => setAccessType(e.target.value)}
-              className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            >
-              <option value="view">View</option>
-              <option value="edit">Edit</option>
-            </select>
-            <div className="flex flex-row gap-4 justify-center">
-              <button
-                onClick={handleAddCollaborator}
-                className="btn self-center bg-green-100 text-green-800 hover:bg-green-200 px-4 py-2 rounded-full dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-600 mt-2"
-              >
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300">
+          <div className="bg-white p-8 rounded-lg shadow-2xl dark:bg-gray-800 w-full max-w-md m-4 transform transition-transform duration-300 scale-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                 Add Collaborator
-              </button>
+              </h2>
               <button
                 onClick={() => setShowAddCollabModal(false)}
-                className="btn bg-gray-100 self-center text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-full dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 mt-2"
+                className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
-                Cancel
+                <FaTimes />
               </button>
             </div>
+
+            {repoMade && (
+              <div
+                role="alert"
+                className="alert alert-success bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-md"
+              >
+                <span>New Collaborator Added Successfully!</span>
+              </div>
+            )}
+            {error && (
+              <div
+                role="alert"
+                className="alert alert-error bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md"
+              >
+                <span>{error}</span>
+              </div>
+            )}
+
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Add a new collaborator to{" "}
+              <span className="font-semibold">{label}</span>.
+            </p>
+            <form onSubmit={handleAddCollaborator} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={newCollaborator}
+                  onChange={(e) => setNewCollaborator(e.target.value)}
+                  placeholder="Enter collaborator's username"
+                  className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Access Level
+                </label>
+                <select
+                  value={accessType}
+                  onChange={(e) => setAccessType(e.target.value)}
+                  className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                >
+                  <option value="view">View</option>
+                  <option value="edit">Edit</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddCollabModal(false)}
+                  className="px-6 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md font-medium transition-colors dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md font-medium transition-colors dark:bg-blue-500 dark:hover:bg-blue-600"
+                >
+                  Add
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

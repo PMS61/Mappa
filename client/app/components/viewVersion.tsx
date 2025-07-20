@@ -1,176 +1,231 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import getVersionAction from "@/actions/getVersions";
 import readVersionAction from "@/actions/readVersion";
 import dynamic from "next/dynamic";
+import { FaHistory, FaTimes, FaEye, FaUndo, FaSpinner } from "react-icons/fa";
 
-// Import the DisplayFileContent component dynamically to avoid SSR issues with browser-specific features
+// Dynamically import the DisplayFileContent component to avoid SSR issues
 const DisplayFileContent = dynamic(
   () => import("../display-file-content/page"),
-  { ssr: false }
+  {
+    loading: () => <p>Loading file content...</p>,
+    ssr: false,
+  },
 );
+
+// A reusable, modern modal component
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-2xl m-4 transform transition-transform scale-100">
+        <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+            {title}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            <FaTimes />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+};
 
 const VersionPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [inpData, setInpData] = useState([]);
+  const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
+  const [versions, setVersions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [showFileContent, setShowFileContent] = useState(false);
   const [fileData, setFileData] = useState({
     content: "",
     fileName: "",
-    path: ""
+    path: "",
   });
-  
-  const toggleModal = async (e) => {
-    e.preventDefault();
-    setIsModalOpen(!isModalOpen);
-    const { success, versions } = await getVersionAction();
-    setInpData(versions);
-    if (!success) {
-      return <div>Error: {success}</div>;
+
+  const toggleModal = async () => {
+    if (!isModalOpen) {
+      setIsLoading(true);
+      setError(null);
+      setIsModalOpen(true);
+      try {
+        const { success, versions: fetchedVersions } = await getVersionAction();
+        if (success) {
+          setVersions(fetchedVersions);
+        } else {
+          setError("Failed to fetch version history.");
+        }
+      } catch (err) {
+        setError("An error occurred while fetching versions.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setIsModalOpen(false);
+      setSelectedVersion(null);
     }
   };
 
-  const [getVer, setVer] = useState();
-  const handleRowClick = (index, version) => {
-    setVer(version);
-    setSelectedRow(index);
+  const handleRowClick = (version: number) => {
+    setSelectedVersion(version);
   };
 
   const handleReadOnly = async () => {
+    if (selectedVersion === null) return;
     try {
-      const { success, data } = await readVersionAction(getVer);
-      if (success) {
-        // Store the file data in component state
+      const { success, data } = await readVersionAction(selectedVersion);
+      if (success && data) {
         setFileData({
           content: data.content || "",
-          fileName: data.path?.split('/').pop() || "Untitled",
-          path: data.path || ""
+          fileName: data.path?.split("/").pop() || "Untitled",
+          path: data.path || "",
         });
-        
-        // Close the modal and show the file content display
-        setIsModalOpen(false);
         setShowFileContent(true);
+      } else {
+        alert("Could not load file content for this version.");
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      alert("An error occurred while loading file content.");
     }
   };
 
   const handleRevert = async () => {
+    if (selectedVersion === null) return;
     try {
-      const { success, data } = await readVersionAction(getVer);
-      if (success) {
+      const { success, data } = await readVersionAction(selectedVersion);
+      if (success && data) {
         window.dispatchEvent(
           new CustomEvent("revert-version", {
             detail: {
-              path: data?.path,
-              content: data?.content,
+              path: data.path,
+              content: data.content,
             },
-          })
+          }),
         );
+        alert(`Reverted to version ${selectedVersion}.`);
+        toggleModal();
+      } else {
+        alert("Failed to revert to this version.");
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      alert("An error occurred during the revert process.");
     }
   };
 
-  const handleCloseFileContent = () => {
-    setShowFileContent(false);
-    setFileData({ content: "", fileName: "", path: "" });
-    setIsModalOpen(true);
-  };
-
   return (
-    <div className="absolute bottom-5 left-5">
-      <button
-        onClick={toggleModal}
-        className="bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-      >
-        Commit History
-      </button>
+    <>
+      <div className="absolute bottom-4 right-4 z-10">
+        <button
+          onClick={toggleModal}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105"
+        >
+          <FaHistory />
+          Commit History
+        </button>
+      </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg dark:bg-gray-800">
-            <h2 className="text-2xl dark:text-white font-bold mb-4">
-              Version Information
-            </h2>
-            <table className="min-w-full bg-white dark:bg-gray-800 text-center">
-              <thead>
+      <Modal isOpen={isModalOpen} onClose={toggleModal} title="Commit History">
+        <div className="max-h-[60vh] overflow-y-auto">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-48">
+              <FaSpinner className="animate-spin text-4xl text-blue-500" />
+            </div>
+          ) : error ? (
+            <p className="text-red-500 text-center">{error}</p>
+          ) : versions.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400 text-center">
+              No commit history found for this repository.
+            </p>
+          ) : (
+            <table className="min-w-full text-left text-sm">
+              <thead className="border-b bg-gray-50 dark:bg-gray-700 sticky top-0">
                 <tr>
-                  <th className="py-2 px-4 bg-yellow-600 text-white dark:bg-blue-500">
-                    Version
-                  </th>
-                  <th className="py-2 px-4 bg-yellow-600 text-white dark:bg-blue-500">
-                    Commit
-                  </th>
-                  <th className="py-2 px-4 bg-yellow-600 text-white dark:bg-blue-500">
-                    Username
-                  </th>
+                  <th className="px-6 py-3 font-semibold">Version</th>
+                  <th className="px-6 py-3 font-semibold">Commit Message</th>
+                  <th className="px-6 py-3 font-semibold">Author</th>
                 </tr>
               </thead>
               <tbody>
-                {inpData &&
-                  inpData.map((row, index) => (
-                    <tr
-                      key={index}
-                      className={`border-b dark:border-gray-700 cursor-pointer ${selectedRow === index ? "bg-yellow-200 dark:bg-gray-700" : ""}`}
-                      onClick={() => handleRowClick(index, row?.version)}
-                    >
-                      <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                        {row?.version}
-                      </td>
-                      <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                        {row?.commit}
-                      </td>
-                      <td className="py-2 px-4 text-gray-800 dark:text-gray-200">
-                        {row?.uid}
-                      </td>
-                    </tr>
-                  ))}
+                {versions.map((row) => (
+                  <tr
+                    key={row.version}
+                    className={`border-b dark:border-gray-700 cursor-pointer transition-colors ${
+                      selectedVersion === row.version
+                        ? "bg-blue-100 dark:bg-blue-900/50"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    }`}
+                    onClick={() => handleRowClick(row.version)}
+                  >
+                    <td className="px-6 py-4">{row.version}</td>
+                    <td className="px-6 py-4">{row.commit}</td>
+                    <td className="px-6 py-4">{row.uid}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-            {selectedRow !== null && (
-              <div className="mt-4 flex justify-center space-x-4">
-                <button
-                  onClick={handleReadOnly}
-                  className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                >
-                  Read Only
-                </button>
-                <button
-                  onClick={handleRevert}
-                  className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-                >
-                  Revert
-                </button>
-              </div>
-            )}
+          )}
+        </div>
+        {selectedVersion !== null && (
+          <div className="mt-6 flex justify-end space-x-4">
             <button
-              onClick={toggleModal}
-              className="mt-4 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+              onClick={handleReadOnly}
+              className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md font-medium dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
             >
-              Close
+              <FaEye />
+              Read Only
+            </button>
+            <button
+              onClick={handleRevert}
+              className="flex items-center gap-2 px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md font-medium dark:bg-red-500 dark:hover:bg-red-600"
+            >
+              <FaUndo />
+              Revert
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {showFileContent && (
-        <div className="fixed inset-0 z-50">
-          <DisplayFileContent 
-            onClose={handleCloseFileContent} 
-            version={getVer} 
-            isVersionView={true}
-            fileContent={fileData.content}
-            fileName={fileData.fileName}
-            filePath={fileData.path}
-          />
-        </div>
+        <Modal
+          isOpen={showFileContent}
+          onClose={() => setShowFileContent(false)}
+          title={`Viewing: ${fileData.fileName} (v${selectedVersion})`}
+        >
+          <div className="max-h-[70vh] overflow-auto rounded-lg">
+            <DisplayFileContent
+              onClose={() => setShowFileContent(false)}
+              version={selectedVersion || 0}
+              isVersionView={true}
+              fileContent={fileData.content}
+              fileName={fileData.fileName}
+              filePath={fileData.path}
+            />
+          </div>
+        </Modal>
       )}
-    </div>
+    </>
   );
 };
 

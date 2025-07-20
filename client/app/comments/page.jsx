@@ -1,51 +1,81 @@
 "use client";
 
-import { RoomProvider } from "@/app/liveblocks.config.ts"; // Adjust the import path as needed
-import Comments from "./Comments"; // Adjust the import path as needed
+import { RoomProvider } from "@/app/liveblocks.config.ts";
+import Comments from "./Comments";
 import { LiveblocksUIConfig } from "@liveblocks/react-ui";
 import Cookies from "js-cookie";
-import React, { useState } from 'react';
-import Chatbot from '../chatbot/page';
-import Meet from '../meet/page'; // Import the Meet component
-import { FaComments, FaRobot, FaVideo } from 'react-icons/fa'; // Import icons
+import React, { useState } from "react";
+import Chatbot from "../chatbot/page";
+import Meet from "../meet/page";
+import { FaComments, FaRobot, FaVideo } from "react-icons/fa";
 
-export default function CommentsPage({ roomId="global" }) {
-  console.log("chat room id:", roomId)
+// A single tab button component for better code organization and styling
+const FeatureTab = ({ icon, label, isActive, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 w-full ${
+      isActive
+        ? "bg-blue-600 text-white shadow-md"
+        : "text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+    }`}
+  >
+    {icon}
+    <span className="hidden sm:inline">{label}</span>
+  </button>
+);
+
+export default function CommentsPage({ roomId = "global" }) {
   const username = Cookies.get("username");
   const [activeFeature, setActiveFeature] = useState("discussions");
 
+  // Renders the active component based on state
+  const renderFeature = () => {
+    switch (activeFeature) {
+      case "chatbot":
+        return <Chatbot />;
+      case "meet":
+        return <Meet />;
+      case "discussions":
+      default:
+        return <Comments />;
+    }
+  };
+
   return (
     <LiveblocksUIConfig
-      overrides={{ locale: "en", USER_UNKNOWN: username ? username : "Anonymous" /* ... */ }}
+      overrides={{
+        locale: "en",
+        USER_UNKNOWN: username || "Anonymous",
+      }}
     >
-      <RoomProvider
-        id={roomId}
-        initialPresence={{}} // Add any initial presence data if needed
-        initialStorage={{}} // Add any initial storage data if needed
-      >
-        <div className="h-screen bg-gradient-to-r from-yellow-100 to-orange-100 backdrop-blur-md dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 flex flex-col">
-          <h2 className="text-xl font-bold text-center p-4 bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent dark:from-blue-500 dark:to-purple-500">
-            {activeFeature.charAt(0).toUpperCase() + activeFeature.slice(1)}
-          </h2>
-          <div className="flex justify-center space-x-4 p-2">
-            <button onClick={() => setActiveFeature("discussions")} className="p-2 bg-blue-500 text-white rounded flex items-center space-x-2">
-              <FaComments />
-              <span>Discussions</span>
-            </button>
-            <button onClick={() => setActiveFeature("chatbot")} className="p-2 bg-blue-500 text-white rounded flex items-center space-x-2">
-              <FaRobot />
-              <span>Chatbot</span>
-            </button>
-            <button onClick={() => setActiveFeature("meet")} className="p-2 bg-blue-500 text-white rounded flex items-center space-x-2">
-              <FaVideo />
-              <span>Meet</span>
-            </button>
-          </div>
-          <div className="flex-grow overflow-auto">
-            {activeFeature === "discussions" && <Comments />}
-            {activeFeature === "chatbot" && <Chatbot />}
-            {activeFeature === "meet" && <Meet />}
-          </div>
+      <RoomProvider id={roomId} initialPresence={{}} initialStorage={{}}>
+        <div className="flex flex-col h-full w-full bg-white dark:bg-gray-800">
+          {/* Header with modernized feature tabs */}
+          <header className="flex-shrink-0 p-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-center space-x-2">
+              <FeatureTab
+                icon={<FaComments />}
+                label="Discussions"
+                isActive={activeFeature === "discussions"}
+                onClick={() => setActiveFeature("discussions")}
+              />
+              <FeatureTab
+                icon={<FaRobot />}
+                label="Chatbot"
+                isActive={activeFeature === "chatbot"}
+                onClick={() => setActiveFeature("chatbot")}
+              />
+              <FeatureTab
+                icon={<FaVideo />}
+                label="Meet"
+                isActive={activeFeature === "meet"}
+                onClick={() => setActiveFeature("meet")}
+              />
+            </div>
+          </header>
+
+          {/* Content Area */}
+          <div className="flex-grow overflow-y-auto">{renderFeature()}</div>
         </div>
       </RoomProvider>
     </LiveblocksUIConfig>

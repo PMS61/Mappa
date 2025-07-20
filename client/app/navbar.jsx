@@ -2,30 +2,39 @@
 import Cookies from "js-cookie";
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@/context/ThemeProvider";
+import { FaSun, FaMoon } from "react-icons/fa";
+
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
-  const [username, setUsername] = useState();
+  const [username, setUsername] = useState("Guest");
+
   useEffect(() => {
-    setUsername(Cookies.get("username") || "Guest");
+    const user = Cookies.get("username");
+    if (user) {
+      setUsername(user);
+    }
   }, []);
+
   return (
-    <nav className="rounded-3xl bg-gradient-to-r from-yellow-600 to-yellow-800 p-4 dark:from-blue-500 dark:to-purple-500 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center">
-        <a href="/" className="text-2xl font-bold text-white">
+    <nav className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg shadow-md rounded-xl sticky top-4 z-50 mb-6">
+      <div className="container mx-auto px-6 py-3 flex justify-between items-center">
+        <a
+          href="/"
+          className="text-2xl font-bold text-gray-800 dark:text-white"
+        >
           Mappa ✨
         </a>
-        <div className="flex items-center space-x-4">
-          <p className="text-2xl font-bold text-white">{username}</p>
-          <div
+        <div className="flex items-center space-x-6">
+          <p className="text-lg font-semibold text-gray-700 dark:text-gray-200 hidden sm:block">
+            Welcome, {username}
+          </p>
+          <button
             onClick={toggleTheme}
-            className="relative w-16 h-8 bg-gray-300 rounded-full cursor-pointer dark:bg-gray-700"
+            className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300"
+            aria-label="Toggle theme"
           >
-            <div
-              className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center transform transition-transform duration-500 ${theme === "dark" ? "translate-x-8" : ""}`}
-            >
-              {theme === "dark" ? "🌙" : "☀️"}
-            </div>
-          </div>
+            {theme === "dark" ? <FaSun size={20} /> : <FaMoon size={20} />}
+          </button>
         </div>
       </div>
     </nav>

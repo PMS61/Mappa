@@ -3,104 +3,110 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import loginAction from "@/actions/login";
 import Navbar from "../navbar";
+import { FaEnvelope, FaLock, FaSignInAlt } from "react-icons/fa";
 
-const Page = () => {
+const LoginPage = () => {
   const router = useRouter();
-  let [formData, setFormData] = useState({});
-  let [error, setError] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(false);
     try {
-      let response = await loginAction(formData);
+      const response = await loginAction(formData);
       if (response.success) {
         router.push("/dashboard");
       } else {
-        setError(response.success);
+        setError(true);
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      setError(true);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 p-6 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e]">
-      <Navbar />
-      <div className="hero min-h-screen">
-        <div className="hero-content w-full max-w-md">
-          <div className="card bg-white/90 backdrop-blur-md shadow-2xl w-full dark:bg-gray-800/90">
-            <div className="card-body">
-              <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent dark:from-blue-500 dark:to-purple-500">
-                Login Account ✨
-              </h2>
-              {error ? (
-                <div role="alert" className="alert alert-error">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 shrink-0 stroke-current"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Error! Email or Password incorrect</span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8">
+        <Navbar />
+        <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-md space-y-8">
+            <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-8 md:p-10">
+              <div className="text-center">
+                <FaSignInAlt className="mx-auto h-12 w-auto text-blue-600 dark:text-blue-400" />
+                <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  Welcome Back!
+                </h2>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  Sign in to continue to Mappa
+                </p>
+              </div>
+
+              {error && (
+                <div
+                  role="alert"
+                  className="mt-6 alert alert-error bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md"
+                >
+                  <span>Error! Email or Password incorrect.</span>
                 </div>
-              ) : (
-                ""
               )}
-              <form className="space-y-4" onSubmit={handleRegister}>
-                <div className="form-control" style={{ "--index": 1 }}>
-                  <label className="label">
-                    <span className="label-text flex items-center gap-2 dark:text-gray-200">
-                      📧 Email
-                    </span>
-                  </label>
+
+              <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+                <div className="relative">
+                  <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
+                    id="email"
+                    name="email"
                     type="email"
-                    placeholder="email"
-                    onChange={(e) => {
-                      setFormData({ ...formData, email: e.target.value });
-                    }}
-                    className="input input-bordered hover:border-yellow-400 focus:border-yellow-500 text-gray-800 dark:text-gray-200 dark:bg-gray-700"
+                    autoComplete="email"
                     required
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="Email address"
                   />
                 </div>
-                <div className="form-control" style={{ "--index": 2 }}>
-                  <label className="label">
-                    <span className="label-text flex items-center gap-2 dark:text-gray-200">
-                      🔑 Password
-                    </span>
-                  </label>
+                <div className="relative">
+                  <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
+                    id="password"
+                    name="password"
                     type="password"
-                    placeholder="password"
-                    onChange={(e) => {
-                      setFormData({ ...formData, password: e.target.value });
-                    }}
-                    className="input input-bordered hover:border-yellow-400 focus:border-yellow-500 text-gray-800 dark:text-gray-200 dark:bg-gray-700"
+                    autoComplete="current-password"
                     required
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="Password"
                   />
                 </div>
-                <div className="form-control mt-6">
-                  <button className="btn btn-primary text-white dark:bg-blue-600 dark:hover:bg-blue-700">
-                    Login ✨
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    {loading ? "Signing in..." : "Sign in"}
                   </button>
                 </div>
-                <p className="text-center text-sm text-gray-600 mt-4 dark:text-gray-400">
-                  Don`t have an account?{" "}
-                  <a
-                    href="/register"
-                    className="text-yellow-600 hover:text-yellow-700 font-medium dark:text-blue-400 dark:hover:text-blue-500"
-                  >
-                    Register Here
-                  </a>
-                </p>
               </form>
+              <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                Don't have an account?{" "}
+                <a
+                  href="/register"
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Register Here
+                </a>
+              </p>
             </div>
           </div>
         </div>
@@ -109,4 +115,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default LoginPage;

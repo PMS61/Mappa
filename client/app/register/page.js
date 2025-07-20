@@ -3,118 +3,119 @@ import Navbar from "../navbar";
 import React, { useState } from "react";
 import registerAction from "@/actions/register";
 import { useRouter } from "next/navigation";
+import {
+  FaEnvelope,
+  FaLock,
+  FaUser,
+  FaExclamationCircle,
+} from "react-icons/fa";
 
-const Page = () => {
+const RegisterPage = () => {
   const router = useRouter();
-  let [formData, setFormData] = useState({});
+  let [formData, setFormData] = useState({
+    email: "",
+    username: "",
+    password: "",
+  });
   let [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(false);
     try {
       let response = await registerAction(formData);
-      if (response.success) router.push("/dashboard");
-      else setError(response.success);
+      if (response.success) {
+        router.push("/dashboard");
+      } else {
+        setError(true);
+      }
     } catch (e) {
-      console.log(e);
+      setError(true);
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 p-6 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e]">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <Navbar />
-      <div className="hero min-h-screen">
-        <div className="hero-content w-full max-w-md">
-          <div className="card bg-white/90 backdrop-blur-md shadow-2xl w-full dark:bg-gray-800/90">
-            <div className="card-body">
-              <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent dark:from-blue-500 dark:to-purple-500">
-                Create Account ✨
-              </h2>
-              {error ? (
-                <div role="alert" className="alert alert-error">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 shrink-0 stroke-current"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Error! Email is already registerd please login</span>
-                </div>
-              ) : (
-                ""
-              )}
-              <form className="space-y-4" onSubmit={handleRegister}>
-                <div className="form-control" style={{ "--index": 1 }}>
-                  <label className="label">
-                    <span className="label-text flex items-center gap-2 dark:text-gray-200">
-                      📧 Email
-                    </span>
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="email"
-                    onChange={(e) => {
-                      setFormData({ ...formData, email: e.target.value });
-                    }}
-                    className="input input-bordered hover:border-yellow-400 focus:border-yellow-500 text-gray-800 dark:text-gray-200 dark:bg-gray-700"
-                    required
-                  />
-                </div>
-                <div className="form-control" style={{ "--index": 1 }}>
-                  <label className="label">
-                    <span className="label-text flex items-center gap-2 dark:text-gray-200">
-                      🚽 User Name
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="User Name"
-                    onChange={(e) => {
-                      setFormData({ ...formData, username: e.target.value });
-                    }}
-                    className="input input-bordered hover:border-yellow-400 focus:border-yellow-500 text-gray-800 dark:text-gray-200 dark:bg-gray-700"
-                    required
-                  />
-                </div>
-                <div className="form-control" style={{ "--index": 2 }}>
-                  <label className="label">
-                    <span className="label-text flex items-center gap-2 dark:text-gray-200">
-                      🔑 Password
-                    </span>
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="password"
-                    onChange={(e) => {
-                      setFormData({ ...formData, password: e.target.value });
-                    }}
-                    className="input input-bordered hover:border-yellow-400 focus:border-yellow-500 text-gray-800 dark:text-gray-200 dark:bg-gray-700"
-                    required
-                  />
-                </div>
-                <div className="form-control mt-6">
-                  <button className="btn btn-primary text-white dark:bg-blue-600 dark:hover:bg-blue-700">
-                    Create Account ✨
-                  </button>
-                </div>
-                <p className="text-center text-sm text-gray-600 mt-4 dark:text-gray-400">
-                  Already have an account?{" "}
-                  <a
-                    href="/login"
-                    className="text-yellow-600 hover:text-yellow-700 font-medium dark:text-blue-400 dark:hover:text-blue-500"
-                  >
-                    Login here
-                  </a>
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-8">
+          <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-8 md:p-10">
+            <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-6">
+              Create Your Account
+            </h2>
+            {error && (
+              <div
+                role="alert"
+                className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md flex items-center gap-3"
+              >
+                <FaExclamationCircle />
+                <p>
+                  This email may already be registered. Please try logging in.
                 </p>
-              </form>
-            </div>
+              </div>
+            )}
+            <form className="space-y-6" onSubmit={handleRegister}>
+              <div className="relative">
+                <FaEnvelope className="absolute top-3.5 left-4 text-gray-400" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email address"
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 transition-colors"
+                  required
+                />
+              </div>
+              <div className="relative">
+                <FaUser className="absolute top-3.5 left-4 text-gray-400" />
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 transition-colors"
+                  required
+                />
+              </div>
+              <div className="relative">
+                <FaLock className="absolute top-3.5 left-4 text-gray-400" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 transition-colors"
+                  required
+                />
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+                >
+                  {loading ? "Creating Account..." : "Create Account"}
+                </button>
+              </div>
+              <p className="text-center text-sm text-gray-600 mt-4 dark:text-gray-400">
+                Already have an account?{" "}
+                <a
+                  href="/login"
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Log in
+                </a>
+              </p>
+            </form>
           </div>
         </div>
       </div>
@@ -122,4 +123,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default RegisterPage;

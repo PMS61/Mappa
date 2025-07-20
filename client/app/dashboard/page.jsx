@@ -1,26 +1,26 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import CardWithModal from "./repoCard";
-import Button from "./Button";
 import Cookies from "js-cookie";
 import createRepoAction from "@/actions/newRepo";
 import {
   createOrgAction,
   fetchOrgsByUidAction,
   createAddCollabs,
-} from "@/actions/org"; // Ensure correct import path
-import fetchReposAction from "@/actions/allRepos"; // Ensure correct import path
+} from "@/actions/org";
+import fetchReposAction from "@/actions/allRepos";
 import Navbar from "../navbar";
-import { get } from "http";
+import CardWithModal from "./repoCard";
+import {
+  FaFolder,
+  FaFolderPlus,
+  FaPlus,
+  FaUsers,
+  FaTimes,
+} from "react-icons/fa";
 
-const Page = () => {
+const DashboardPage = () => {
   const [repositories, setRepositories] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [currentRepo, setCurrentRepo] = useState(null);
-  const [collaborators, setCollaborators] = useState([]);
-  const [newCollaborator, setNewCollaborator] = useState("");
-  const [accessType, setAccessType] = useState("view");
   const [showAddRepoModal, setShowAddRepoModal] = useState(false);
   const [newRepoName, setNewRepoName] = useState("");
   const [repoMade, setRepoMade] = useState(false);
@@ -32,39 +32,29 @@ const Page = () => {
   const [newCollaboratorName, setNewCollaboratorName] = useState("");
   const [error, setError] = useState("");
   const [sidebarItems, setSidebarItems] = useState([]);
-  const [org, setOrg] = useState();
-  const [getOrgErr,setGetOrgErr] = useState(false);
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [getOrgErr, setGetOrgErr] = useState(false);
 
   useEffect(() => {
-    const fetchAllRepos = async () => {
-      try {
-        const result = await fetchReposAction();
-        if (result.success) {
-          setRepositories(result.repos);
-          console.log(result.repos);
-        } else {
-          setRepositories([])
-          console.error(result.error);
-        }
-      } catch (error) {
-        console.error("Error fetching repositories:", error);
-      }
-    };
-    let orgItems = [];
     const fetchAllOrgs = async () => {
       try {
         const result = await fetchOrgsByUidAction();
-        if (result.success) {
-          orgItems = result.orgs.orgs.map((org) => ({
-            icon: "🗂️",
+        if (result.success && result.orgs.orgs) {
+          const orgItems = result.orgs.orgs.map((org) => ({
+            icon: <FaFolder />,
             label: org.org_name,
             org_id: org.org_id,
-            color: "bg-cyan-500",
           }));
           setSidebarItems(orgItems);
+          if (!selectedOrg && orgItems.length > 0) {
+            setSelectedOrg(orgItems[0]);
+            Cookies.set("org", orgItems[0].label);
+            Cookies.set("org_id", orgItems[0].org_id);
+          }
           setGetOrgErr(false);
         } else {
           setGetOrgErr(true);
+          setSidebarItems([]);
           console.error(result.error);
         }
       } catch (error) {
@@ -73,296 +63,302 @@ const Page = () => {
       }
     };
     fetchAllOrgs();
-    fetchAllRepos();
-    // const intervalId = setInterval(() => {
-    //   fetchAllOrgs();
-    //   if (org != undefined) {
-    //     fetchAllRepos();
-    //   }
-    // }, 500);
+  }, [orgMade]);
 
-    // return () => clearInterval(intervalId);
-  }, [repoMade, orgMade, org,getOrgErr]);
+  useEffect(() => {
+    const fetchAllRepos = async () => {
+      if (!selectedOrg) return;
+      try {
+        const result = await fetchReposAction();
+        if (result.success) {
+          setRepositories(result.repos);
+        } else {
+          setRepositories([]);
+          console.error(result.error);
+        }
+      } catch (error) {
+        setRepositories([]);
+        console.error("Error fetching repositories:", error);
+      }
+    };
+    fetchAllRepos();
+  }, [selectedOrg, repoMade]);
 
   const handleAddRepo = async (e) => {
     e.preventDefault();
+    if (!newRepoName.trim()) return;
     try {
       const result = await createRepoAction(newRepoName);
       if (result.success) {
         setNewRepoName("");
-        setRepoMade(true);
+        setRepoMade(!repoMade); // Toggle to trigger refetch
+        setShowAddRepoModal(false);
       } else {
-        setRepoMade(false);
-        setError(result.error);
+        setError(result.error || "Failed to create repository.");
       }
     } catch (e) {
+      setError("An unexpected error occurred.");
       console.log(e);
     }
   };
 
   const handleCreateOrg = async (e) => {
     e.preventDefault();
+    if (!newOrgName.trim()) return;
     try {
       const result = await createOrgAction(newOrgName);
       if (result.success) {
         setNewOrgName("");
-        setOrgMade(true);
+        setOrgMade(!orgMade); // Toggle to trigger refetch
+        setShowOrgModal(false);
       } else {
-        setOrgMade(false);
-        setError(result.error);
+        setError(result.error || "Failed to create organization.");
       }
-      console.log(result);
     } catch (e) {
+      setError("An unexpected error occurred.");
       console.log(e);
     }
   };
 
   const handleAddCollab = async (e) => {
     e.preventDefault();
+    if (!newCollaboratorName.trim() || !selectedOrg) return;
     try {
       const result = await createAddCollabs(
-        Cookies.get("org"),
+        selectedOrg.label,
         newCollaboratorName,
       );
-      console.log(result.orgs.orgs);
       if (result.success) {
-        setNewOrgName("");
-        setOrgMade(true);
+        setNewCollaboratorName("");
+        setShowAddCollaboratorModal(false);
+        // Optionally, show a success message
       } else {
-        setOrgMade(false);
-        setError(result.error);
+        setError(result.error || "Failed to add collaborator.");
       }
     } catch (e) {
-      console.log(e.error);
+      setError("An unexpected error occurred.");
+      console.log(e);
     }
   };
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 p-6 dark:from-[#1a1a2e] dark:via-[#1a1a2e] dark:to-[#1a1a2e]">
-      <div className="flex flex-row">
-        <div className="flex flex-col gap-4 px-2">
-          <button
-            onClick={() => setShowOrgModal(true)}
-            className="rounded-3xl p-4 bg-blue-500 shadow-lg mb-6"
-          >
-            <p className="text-xl font-bold text-white">Create Organization</p>
-          </button>
-          <div className="p-4 flex flex-col gap-3 bg-white/90 backdrop-blur-md shadow-2xl rounded-xl border-2 border-yellow-200 dark:bg-gray-800/90 dark:border-gray-700">
-            {sidebarItems &&
-              sidebarItems.map((item, index) => (
-                <div
-                  key={index}
-                  className={`bg-gradient-to-br ${item.color} p-2 rounded-xl
-                        bg-white/90 backdrop-blur-md
-                         shadow-lg hover:shadow-xl transition-all duration-300
-                         transform hover:-translate-y-1 border border-yellow-100 dark:border-gray-700
-                         animate-fadeIn flex flex-row gap-4`}
-                  onClick={() => {
-                    Cookies.set("org", item.label); // Expires in 7 days
-                    Cookies.set("org_id", item.org_id);
-                    setOrg(item.label);
-                  }}
-                >
-                  <div className="flex flex-row gap-2 cursor-pointer">
-                    <p>{item.icon}</p>
-                    <h2 className="text-xl font-bold text-gray-700 dark:text-gray-200 self-center">
-                      {item.label}
-                    </h2>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-        <div className="w-5/6 mx-auto">
-          <Navbar />
-          <div className="mt-8 bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border-2 border-yellow-200 dark:bg-gray-800/90 dark:border-gray-700">
-            {/* Header section */}
-            <div className="flex flex-col md:flex-row gap-12 justify-between items-center mb-12">
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent mb-2 dark:from-blue-500 dark:to-purple-500">
-                  {org}
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Here`s your personal dashboard
-                </p>
-              </div>
-              <div className="flex flex-row gap-4">
-                <Button
-                  onClick={() => setShowAddCollaboratorModal(true)}
-                  className="btn bg-blue-100 text-blue-800 hover:bg-blue-200 px-6 rounded-full flex items-center gap-2 dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-600"
-                  icon="➕"
-                  label="Add org collabs"
-                />
-                <Button
-                  onClick={() => setShowAddRepoModal(true)}
-                  className="btn bg-green-100 text-green-800 hover:bg-green-200 px-6 rounded-full flex items-center gap-2 dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-600"
-                  icon="➕"
-                  label="Add Repo"
-                />
-              </div>
-            </div>
 
-            {/* Repositories info cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {repositories.map((repo, index) => (
-                <CardWithModal
-                  key={index}
-                  index={index}
-                  icon="📁"
-                  label={repo.repo_name}
-                  value={repo.repo_id}
-                  color="from-blue-50 to-blue-100 dark:from-blue-700 dark:to-blue-500"
-                />
-              ))}
-            </div>
+  const handleSelectOrg = (org) => {
+    setSelectedOrg(org);
+    Cookies.set("org", org.label);
+    Cookies.set("org_id", org.org_id);
+  };
+
+  const Modal = ({ isOpen, onClose, title, children }) => {
+    if (!isOpen) return null;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md m-4 transform transition-transform scale-100">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+              {title}
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              <FaTimes />
+            </button>
           </div>
+          {children}
         </div>
       </div>
+    );
+  };
 
-      {/* Add Repo Modal */}
-      {showAddRepoModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 w-96">
-            {repoMade ? (
-              <div role="alert" className="alert alert-success">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 shrink-0 stroke-current"
-                  fill="none"
-                  viewBox="0 0 24 24"
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Navbar />
+      <div className="flex flex-row container mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8">
+        {/* Sidebar */}
+        <aside className="w-1/4 hidden lg:block">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg h-full">
+            <button
+              onClick={() => setShowOrgModal(true)}
+              className="w-full flex items-center justify-center gap-2 mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <FaFolderPlus />
+              Create Organization
+            </button>
+            <nav className="space-y-2">
+              <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Organizations
+              </h3>
+              {sidebarItems.map((item, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSelectOrg(item)}
+                  className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    selectedOrg?.org_id === item.org_id
+                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>New Repository Created Successfully!</span>
-              </div>
-            ) : (
-              ""
-            )}
-            <h2 className="text-xl dark:text-white font-bold mb-4">
-              Create a New Repository
-            </h2>
-            <input
-              type="text"
-              value={newRepoName}
-              onChange={(e) => setNewRepoName(e.target.value)}
-              placeholder="Enter repository name"
-              className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-            <div className="flex flex-row gap-4 justify-center">
-              <button
-                onClick={handleAddRepo}
-                className="btn self-center bg-green-100 text-green-800 hover:bg-green-200 px-4 py-2 rounded-full dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-600 mt-2"
-              >
-                Add Repository
-              </button>
-              <button
-                onClick={() => setShowAddRepoModal(false)}
-                className="btn bg-gray-100 self-center text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-full dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 mt-2"
-              >
-                Cancel
-              </button>
-            </div>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </button>
+              ))}
+              {getOrgErr && (
+                <p className="px-3 text-sm text-red-500">
+                  Could not load organizations.
+                </p>
+              )}
+            </nav>
           </div>
-        </div>
-      )}
+        </aside>
 
-      {/* Create Organization Modal */}
-      {showOrgModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 w-96">
-            {orgMade ? (
-              <div role="alert" className="alert alert-success">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 shrink-0 stroke-current"
-                  fill="none"
-                  viewBox="0 0 24 24"
+        {/* Main Content */}
+        <main className="w-full lg:w-3/4">
+          <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 md:p-8">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {selectedOrg?.label || "Dashboard"}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                  Your projects and repositories.
+                </p>
+              </div>
+              <div className="flex items-center gap-4 mt-4 md:mt-0">
+                <button
+                  onClick={() => setShowAddCollaboratorModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>New Organization Created Successfully!</span>
+                  <FaUsers />
+                  <span>Add Member</span>
+                </button>
+                <button
+                  onClick={() => setShowAddRepoModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <FaPlus />
+                  <span>New Repo</span>
+                </button>
               </div>
-            ) : (
-              ""
-            )}
-            <h2 className="text-xl dark:text-white font-bold mb-4">
-              Create a New Organization
-            </h2>
-            <input
-              type="text"
-              value={newOrgName}
-              onChange={(e) => setNewOrgName(e.target.value)}
-              placeholder="Enter organization name"
-              className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-            <div className="flex flex-row gap-4 justify-center">
-              <button
-                // onClick={() => {
-                //   handleCreateOrg();
-                //   setAdmin(true);
-                // }}
-                onClick={handleCreateOrg}
-                className="btn self-center bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-2 rounded-full dark:bg-blue-700 dark:text-blue-200 dark:hover:bg-blue-600 mt-2"
-              >
-                Create Organization
-              </button>
-              <button
-                onClick={() => setShowOrgModal(false)}
-                className="btn bg-gray-100 self-center text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-full dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 mt-2"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </header>
 
-      {/* Add Collaborator Modal */}
-      {showAddCollaboratorModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 w-96">
-            <h2 className="text-xl dark:text-white font-bold mb-4">
-              Add Organization Collaborator
-            </h2>
-            <input
-              type="text"
-              value={newCollaboratorName}
-              onChange={(e) => setNewCollaboratorName(e.target.value)}
-              placeholder="Enter collaborator username"
-              className="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-            <div className="flex flex-row gap-4 justify-center">
-              <button
-                // onClick={() => {
-                //   handleCreateOrg();
-                //   setAdmin(false);
-                // }}
-                onClick={handleAddCollab}
-                className="btn self-center bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-2 rounded-full dark:bg-blue-700 dark:text-blue-200 dark:hover:bg-blue-600 mt-2"
-              >
-                Add Collaborator
-              </button>
-              <button
-                onClick={() => setShowAddCollaboratorModal(false)}
-                className="btn bg-gray-100 self-center text-gray-800 hover:bg-gray-200 px-4 py-2 rounded-full dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 mt-2"
-              >
-                Cancel
-              </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {repositories.length > 0 ? (
+                repositories.map((repo, index) => (
+                  <CardWithModal
+                    key={index}
+                    index={index}
+                    icon={<FaFolder />}
+                    label={repo.repo_name}
+                    value={repo.repo_id}
+                    color="from-blue-50 to-blue-100 dark:from-blue-800/50 dark:to-blue-700/50"
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No repositories found. Create one to get started!
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        </main>
+      </div>
+
+      {/* Modals */}
+      <Modal
+        isOpen={showAddRepoModal}
+        onClose={() => setShowAddRepoModal(false)}
+        title="Create New Repository"
+      >
+        <form onSubmit={handleAddRepo}>
+          <input
+            type="text"
+            value={newRepoName}
+            onChange={(e) => setNewRepoName(e.target.value)}
+            placeholder="Repository name"
+            className="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+          />
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => setShowAddRepoModal(false)}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Create
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={showOrgModal}
+        onClose={() => setShowOrgModal(false)}
+        title="Create New Organization"
+      >
+        <form onSubmit={handleCreateOrg}>
+          <input
+            type="text"
+            value={newOrgName}
+            onChange={(e) => setNewOrgName(e.target.value)}
+            placeholder="Organization name"
+            className="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+          />
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => setShowOrgModal(false)}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Create
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={showAddCollaboratorModal}
+        onClose={() => setShowAddCollaboratorModal(false)}
+        title="Add Organization Member"
+      >
+        <form onSubmit={handleAddCollab}>
+          <input
+            type="text"
+            value={newCollaboratorName}
+            onChange={(e) => setNewCollaboratorName(e.target.value)}
+            placeholder="Collaborator username"
+            className="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+          />
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => setShowAddCollaboratorModal(false)}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Add
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
 
-export default Page;
+export default DashboardPage;

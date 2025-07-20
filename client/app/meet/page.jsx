@@ -1,109 +1,177 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { FaVideo } from 'react-icons/fa'; // Import icon
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { FaVideo, FaCalendarPlus, FaSpinner, FaClock } from "react-icons/fa";
 
-const Meet = () => {
-  const [name, setName] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [schedules, setSchedules] = useState([]);
-
-  const repoId = Cookies.get('repo_id');
-
-  const fetchSchedules = async () => {
-    try {
-      const response = await axios.post('http://localhost:8000/schedule/get_schedule', { repo_id: repoId });
-      setSchedules(response.data);
-    } catch (error) {
-      console.error('Error fetching schedules:', error);
-    }
+// Component for a single scheduled meeting item
+const ScheduleItem = ({ schedule }) => {
+  const handleJoin = () => {
+    window.open("/meetings", "_blank", "noopener,noreferrer");
   };
 
-  const handleSchedule = async () => {
+  return (
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div>
+        <h3 className="font-semibold text-gray-800 dark:text-white">
+          {schedule.name}
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {new Date(`${schedule.date}T${schedule.time}`).toLocaleString([], {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}
+        </p>
+      </div>
+      <button
+        onClick={handleJoin}
+        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        Join
+      </button>
+    </div>
+  );
+};
+
+// Main Meet component
+const Meet = () => {
+  const [name, setName] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [schedules, setSchedules] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const repoId = Cookies.get("repo_id");
+
+  const fetchSchedules = useCallback(async () => {
+    if (!repoId) {
+      setIsLoading(false);
+      setError("Repository ID not found. Please select a repository first.");
+      return;
+    }
     try {
-      await axios.post('http://localhost:8000/schedule/set_schedule', {
+      const response = await axios.post(
+        "http://localhost:8000/schedule/get_schedule",
+        { repo_id: repoId },
+      );
+      setSchedules(response.data);
+    } catch (error) {
+      console.error("Error fetching schedules:", error);
+      setError("Failed to load schedules.");
+      setSchedules([]); // Clear old schedules on error
+    } finally {
+      setIsLoading(false);
+    }
+  }, [repoId]);
+
+  const handleSchedule = async (e) => {
+    e.preventDefault();
+    if (!name || !date || !time || !repoId) {
+      setError("Please fill all fields to schedule a meeting.");
+      return;
+    }
+    setError("");
+    try {
+      await axios.post("http://localhost:8000/schedule/set_schedule", {
         repo_id: repoId,
         name,
         date,
-        time
+        time,
       });
+      // Clear form and refetch schedules
+      setName("");
+      setDate("");
+      setTime("");
       fetchSchedules();
     } catch (error) {
-      console.error('Error setting schedule:', error);
+      console.error("Error setting schedule:", error);
+      setError("Failed to schedule the meeting.");
     }
   };
 
   useEffect(() => {
     fetchSchedules();
-    const interval = setInterval(fetchSchedules, 3000); // Auto-refresh every 3 seconds
-    return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []);
+    const interval = setInterval(fetchSchedules, 10000); // Auto-refresh every 10 seconds
+    return () => clearInterval(interval);
+  }, [fetchSchedules]);
 
   return (
-    <div className="flex flex-col w-full h-full bg-gradient-to-r from-blue-100 to-green-100 backdrop-blur-md dark:from-gray-900 dark:to-gray-900 p-6">
-      <div className="flex flex-col items-center space-y-6">
-        <FaVideo className="text-6xl text-blue-500" />
-        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-600 to-green-800 bg-clip-text text-transparent dark:from-blue-500 dark:to-purple-500">
-          Schedule Meet
-        </h2>
-        <div className="flex flex-col space-y-3 w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <input
-            type="text"
-            placeholder="Meeting Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="p-3 rounded border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
-          />
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="p-3 rounded border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
-          />
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="p-3 rounded border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
-          />
-          <button onClick={handleSchedule} className="p-3 bg-blue-500 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-600 transition">
-            <FaVideo />
-            <span>Schedule Meet</span>
-          </button>
-          <button onClick={() => window.open('/meetings', '_blank')} className="p-3 bg-green-500 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-green-600 transition">
-            <FaVideo />
-            <span>Join Now</span>
-          </button>
+    <div className="p-6 h-full bg-gray-50 dark:bg-gray-900">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Left: Schedule Form */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-3">
+            <FaCalendarPlus className="text-blue-500" />
+            Schedule a New Meeting
+          </h2>
+          <form onSubmit={handleSchedule} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Meeting Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              required
+            />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              required
+            />
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full p-3 border rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              required
+            />
+            <button
+              type="submit"
+              className="w-full p-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              Schedule Meet
+            </button>
+          </form>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">or</p>
+            <button
+              onClick={() => window.open("/meetings", "_blank")}
+              className="w-full p-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+            >
+              Start an Instant Meeting
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="mt-8 mx-auto w-full max-w-4xl overflow-x-auto">
-        <table className="w-full bg-white dark:bg-gray-800 text-black dark:text-white shadow-md rounded-lg overflow-hidden">
-          <thead>
-            <tr className="bg-blue-500 text-white dark:bg-blue-700">
-              <th className="py-3 px-4 text-left">Name</th>
-              <th className="py-3 px-4 text-left">Date</th>
-              <th className="py-3 px-4 text-left">Time</th>
-              <th className="py-3 px-4 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {schedules.map((schedule, index) => (
-              <tr key={index} className="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                <td className="py-3 px-4">{schedule.name}</td>
-                <td className="py-3 px-4">{schedule.date}</td>
-                <td className="py-3 px-4">{schedule.time}</td>
-                <td className="py-3 px-4">
-                  <button onClick={() => window.open('/meetings', '_blank')} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                    Join
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+        {/* Right: Upcoming Meetings */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-3">
+            <FaClock className="text-purple-500" />
+            Upcoming Meetings
+          </h2>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <FaSpinner className="animate-spin text-3xl text-blue-500" />
+              </div>
+            ) : schedules.length > 0 ? (
+              schedules.map((schedule, index) => (
+                <ScheduleItem key={index} schedule={schedule} />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No upcoming meetings scheduled.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
