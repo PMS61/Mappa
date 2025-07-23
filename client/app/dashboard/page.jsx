@@ -18,19 +18,20 @@ import {
   FaUsers,
   FaTimes,
 } from "react-icons/fa";
+import NewRepoModal from './NewRepoModal';
+import NewOrgModal from './NewOrgModal';
+import AddCollabModal from './AddCollabModal'; // Import the new component
 
 const DashboardPage = () => {
   const [repositories, setRepositories] = useState([]);
   const [showAddRepoModal, setShowAddRepoModal] = useState(false);
-  const [newRepoName, setNewRepoName] = useState("");
   const [repoMade, setRepoMade] = useState(false);
   const [showOrgModal, setShowOrgModal] = useState(false);
-  const [newOrgName, setNewOrgName] = useState("");
   const [orgMade, setOrgMade] = useState(false);
-  const [showAddCollaboratorModal, setShowAddCollaboratorModal] =
-    useState(false);
-  const [newCollaboratorName, setNewCollaboratorName] = useState("");
-  const [error, setError] = useState("");
+  const [showAddCollaboratorModal, setShowAddCollaboratorModal] = useState(false);
+  // Remove newCollaboratorName and error states as they are now in AddCollabModal
+  // const [newCollaboratorName, setNewCollaboratorName] = useState("");
+  // const [error, setError] = useState("");
   const [sidebarItems, setSidebarItems] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [getOrgErr, setGetOrgErr] = useState(false);
@@ -84,62 +85,27 @@ const DashboardPage = () => {
     fetchAllRepos();
   }, [selectedOrg, repoMade]);
 
-  const handleAddRepo = async (e) => {
-    e.preventDefault();
-    if (!newRepoName.trim()) return;
-    try {
-      const result = await createRepoAction(newRepoName);
-      if (result.success) {
-        setNewRepoName("");
-        setRepoMade(!repoMade); // Toggle to trigger refetch
-        setShowAddRepoModal(false);
-      } else {
-        setError(result.error || "Failed to create repository.");
-      }
-    } catch (e) {
-      setError("An unexpected error occurred.");
-      console.log(e);
-    }
-  };
-
-  const handleCreateOrg = async (e) => {
-    e.preventDefault();
-    if (!newOrgName.trim()) return;
-    try {
-      const result = await createOrgAction(newOrgName);
-      if (result.success) {
-        setNewOrgName("");
-        setOrgMade(!orgMade); // Toggle to trigger refetch
-        setShowOrgModal(false);
-      } else {
-        setError(result.error || "Failed to create organization.");
-      }
-    } catch (e) {
-      setError("An unexpected error occurred.");
-      console.log(e);
-    }
-  };
-
-  const handleAddCollab = async (e) => {
-    e.preventDefault();
-    if (!newCollaboratorName.trim() || !selectedOrg) return;
-    try {
-      const result = await createAddCollabs(
-        selectedOrg.label,
-        newCollaboratorName,
-      );
-      if (result.success) {
-        setNewCollaboratorName("");
-        setShowAddCollaboratorModal(false);
-        // Optionally, show a success message
-      } else {
-        setError(result.error || "Failed to add collaborator.");
-      }
-    } catch (e) {
-      setError("An unexpected error occurred.");
-      console.log(e);
-    }
-  };
+  // Remove handleAddCollab as it's now in AddCollabModal
+  // const handleAddCollab = async (e) => {
+  //   e.preventDefault();
+  //   if (!newCollaboratorName.trim() || !selectedOrg) return;
+  //   try {
+  //     const result = await createAddCollabs(
+  //       selectedOrg.label,
+  //       newCollaboratorName,
+  //     );
+  //     if (result.success) {
+  //       setNewCollaboratorName("");
+  //       setShowAddCollaboratorModal(false);
+  //       // Optionally, show a success message
+  //     } else {
+  //       setError(result.error || "Failed to add collaborator.");
+  //     }
+  //   } catch (e) {
+  //     setError("An unexpected error occurred.");
+  //     console.log(e);
+  //   }
+  // };
 
   const handleSelectOrg = (org) => {
     setSelectedOrg(org);
@@ -147,27 +113,28 @@ const DashboardPage = () => {
     Cookies.set("org_id", org.org_id);
   };
 
-  const Modal = ({ isOpen, onClose, title, children }) => {
-    if (!isOpen) return null;
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md m-4 transform transition-transform scale-100">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-              {title}
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              <FaTimes />
-            </button>
-          </div>
-          {children}
-        </div>
-      </div>
-    );
-  };
+  // Remove the inline Modal component as it's now in AddCollabModal
+  // const Modal = ({ isOpen, onClose, title, children }) => {
+  //   if (!isOpen) return null;
+  //   return (
+  //     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity">
+  //       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md m-4 transform transition-transform scale-100">
+  //         <div className="flex justify-between items-center mb-4">
+  //           <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+  //             {title}
+  //           </h2>
+  //           <button
+  //             onClick={onClose}
+  //             className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+  //           >
+  //             <FaTimes />
+  //           </button>
+  //         </div>
+  //         {children}
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -265,98 +232,23 @@ const DashboardPage = () => {
       </div>
 
       {/* Modals */}
-      <Modal
+      <NewRepoModal
         isOpen={showAddRepoModal}
         onClose={() => setShowAddRepoModal(false)}
-        title="Create New Repository"
-      >
-        <form onSubmit={handleAddRepo}>
-          <input
-            type="text"
-            value={newRepoName}
-            onChange={(e) => setNewRepoName(e.target.value)}
-            placeholder="Repository name"
-            className="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-          />
-          <div className="flex justify-end gap-4">
-            <button
-              type="button"
-              onClick={() => setShowAddRepoModal(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Create
-            </button>
-          </div>
-        </form>
-      </Modal>
+        onRepoCreated={() => setRepoMade(!repoMade)}
+      />
 
-      <Modal
+      <NewOrgModal
         isOpen={showOrgModal}
         onClose={() => setShowOrgModal(false)}
-        title="Create New Organization"
-      >
-        <form onSubmit={handleCreateOrg}>
-          <input
-            type="text"
-            value={newOrgName}
-            onChange={(e) => setNewOrgName(e.target.value)}
-            placeholder="Organization name"
-            className="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-          />
-          <div className="flex justify-end gap-4">
-            <button
-              type="button"
-              onClick={() => setShowOrgModal(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Create
-            </button>
-          </div>
-        </form>
-      </Modal>
+        onOrgCreated={() => setOrgMade(!orgMade)}
+      />
 
-      <Modal
+      <AddCollabModal
         isOpen={showAddCollaboratorModal}
         onClose={() => setShowAddCollaboratorModal(false)}
-        title="Add Organization Member"
-      >
-        <form onSubmit={handleAddCollab}>
-          <input
-            type="text"
-            value={newCollaboratorName}
-            onChange={(e) => setNewCollaboratorName(e.target.value)}
-            placeholder="Collaborator username"
-            className="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-          />
-          <div className="flex justify-end gap-4">
-            <button
-              type="button"
-              onClick={() => setShowAddCollaboratorModal(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Add
-            </button>
-          </div>
-        </form>
-      </Modal>
+        selectedOrg={selectedOrg}
+      />
     </div>
   );
 };

@@ -20,6 +20,12 @@ async def post_version(req: PostVersionModel, request: Request):
         # Log the incoming request data
         logger.info(f"Received request: {await request.json()}")
 
+        # Get user UUID from username
+        user_response = supabase.table("users").select("uid").eq("username", req.uid).single().execute()
+        if not user_response.data:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_id = user_response.data["uid"]
+
         # Get the latest version
         latest_version = supabase.table("versions").select("version") \
             .eq("repo_id", req.repo_id).order("version", desc=True).limit(1).execute()
@@ -31,7 +37,7 @@ async def post_version(req: PostVersionModel, request: Request):
             "id": str(uuid.uuid4()),  # Generate a unique ID
             "repo_id": req.repo_id,
             "version": new_version,
-            "uid": req.uid,
+            "uid": user_id,  # Use the fetched UUID
             "commit": req.commit
         }).execute()
 
